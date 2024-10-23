@@ -1,8 +1,6 @@
-# %%
 import pyvista as pv
 import numpy as np
 
-# %%
 #purpose of this class is to assign attributes to meshing objects
 class Material:
     def __init__(self,material,shape,mesh):
@@ -12,27 +10,26 @@ class Material:
     def information(self):
         return "Material:",{self.material}, "Shape:",{self.shape}, "Mesh:",{self.mesh}
 
-# %%
 SiO2_l=10
 SiO2_w=10
 SiO2_h=15
 SiO2_dimension=(SiO2_l,SiO2_w,SiO2_h)
 SiO2=Material("SiO2",SiO2_dimension,"Normal")
 
-# %%
+
 Cu_r=1.99
 Cu_h=9.99
 Cu_dish=5e-3
 Cu_dimension=(Cu_r,Cu_h)
 Copper=Material("Cu",Cu_dimension,"Finer")
 
-# %%
+
 TiN_r=Cu_r+0.01
 TiN_h=Cu_h+0.01
 TiN_dimension=(TiN_r,TiN_h)
 TiN=Material("TiN",TiN_dimension,"Finer")
 
-# %%
+
 #purpose of this class is to generate the SiO2 block with TiN hole
 class gen_SiO2_block:
     def __init__(self,shape):
@@ -53,11 +50,10 @@ class gen_SiO2_block:
         plotter.show()
         return SiO2_cube
 
-# %%
+
 SiO2_block=gen_SiO2_block(SiO2_dimension)
 SiO2_block=SiO2_block.mesh_gen()
 
-# %%
 #purpose of this class is to generate the TiN thin layer
 class gen_TiN_layer:
     def __init__(self,shape):
@@ -81,12 +77,12 @@ class gen_TiN_layer:
         plotter2.show()
         return TiN
 
-# %%
+
 TiN_thin=gen_TiN_layer(TiN_dimension)
 TiN=TiN_thin.mesh_gen()
 TiN.save("TiN_class-parameterized.stl")
 
-# %%
+
 #purpose of this class is to generate the Copper with divit
 class gen_Copper_divit:
     def __init__(self,shape):
@@ -116,6 +112,5 @@ class gen_Copper_divit:
         plotter3.show()
         return Copper_dished
 
-# %%
 Copper_div=gen_Copper_divit(Cu_dimension)
 Copper_div=Copper_div.mesh_gen()
