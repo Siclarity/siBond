@@ -89,6 +89,12 @@ def classification(a):
         a="unidentified"
 
     return a
+
+def full_match(a,b):
+    c=a
+    d=b
+    #return(((c.left<=d.left<=c.right) and (c.left <=d.right<=c.right) and (c.bottom<=d.bottom<=c.top)  and (c.bottom<=d.top<=c.top)) or((d.left<=c.left<=d.right) and (d.left <=c.right<=d.right) and (d.bottom<=c.bottom<=d.top)  and (d.bottom<=c.top<=d.top)))
+    return ((c.left==d.left) and (c.bottom==d.bottom) and (c.right==d.right) and (c.top==d.top))
 start_time=datetime.now()
 total_fullmatch=0
 total_offsetmatch=0
@@ -110,7 +116,8 @@ for i in range(0,len(intersecting_site)):
     #effective_area=abs(abs((min_left-max_right)*(m_bot-max_top))-abs((abs(a.right-b.right)-abs(a.left-b.left))*(abs(a.top-b.top)-abs(a.bottom-b.bottom))))
     #effective_area=abs((abs((abs(a.right)-abs(b.right)))-abs((abs(a.left)-abs(b.left))))*abs((abs((abs(a.top)-abs(b.top)))-abs((abs(a.bottom)-abs(b.bottom))))))
     effective_area=abs((abs(min_left)-abs(min_right))*(abs(min_bot)-abs(min_top)))
-    if((min_left==a.left and min_bot==a.bottom and max_right==a.right and max_top==a.top) or (min_left==b.left and min_bot==b.bottom and max_right==b.right and max_top==b.top)):
+    #if((min_left==a.left and min_bot==a.bottom and max_right==a.right and max_top==a.top) or (min_left==b.left and min_bot==b.bottom and max_right==b.right and max_top==b.top)):
+    if(full_match(a,b)):
         site=["FM",effective_area,c,d]#intersecting_site[i][0],intersecting_site[i][1]]
         alt_site=["FM",effective_area,d,c]
         classify_sites.append([site,a,b])
@@ -130,8 +137,9 @@ for i in range(0,len(intersecting_site)):
             unique_sites.append(site)
 end_time=datetime.now()
 
-print(len(unique_sites))
-print(total_fullmatch)
-print(total_offsetmatch)
-print(classify_sites[22])
+# print(unique_sites)
+print("Total number of unique sites:",len(unique_sites))
+print("Full Matched:",total_fullmatch)
+print("Offset Matched:",total_offsetmatch)
+# print(classify_sites[22])
 print("Total time:",(end_time-start_time))

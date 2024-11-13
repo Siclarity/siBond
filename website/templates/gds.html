@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Upload GDS File</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            .topbar{
+                width:100%;
+                display:flex;
+                flex-direction: row;
+                background-color: #D9D9D9;
+                border-bottom:groove #000;
+                margin:0;
+            }
+            .topbar h1{
+                color: #000;
+                font-family: Inter;
+                font-size: 24px;
+                font-style: normal;
+                font-weight: 600;
+                line-height: normal;
+                text-align: right;
+                padding-left:50vw;
+            }
+            .topbar img{
+                width: 10%;
+                height:10%; 
+            }
+            body{
+                background-color: #D9D9D9;
+            }
+            .inner-body{
+                display:flex;
+                flex-direction: row;
+            }
+            .whitespace{
+                background-color: white;
+                width:90vw;
+                height:90vh;
+            }
+            .left-side-box{
+                display:flex;
+                flex-direction: column;
+                border-right:solid black;
+            }
+            .left-side-box form{
+                color: #000;
+                font-family: Inter;
+                font-size: 24px;
+                font-style: normal;
+                font-weight: 300;
+                line-height: normal;
+            }
+            .left-side-box .File_input .filepath{
+                background-color: white;
+            }
+            .left-side-box a{
+                color: #000;
+                font-family: Inter;
+                font-size: 24px;
+                font-style: normal;
+                font-weight: 300;
+                line-height: normal;
+                padding-top:10vh;
+            }
+            .left-side-box .spacer{
+                padding-bottom: 15vh;
+            }
+        </style>
+    </head>
+    <body>  
+        <div class="topbar">
+            <img src="/static/SiClarity-Logo.png" alt="SiClarity-Logo"/>
+            <h1>MELD</h1>
+        </div>
+        <div class="inner-body">
+            <div class="left-side-box">
+                <div class="spacer"></div>
+                <form class="File_input">
+                    <label for="myfile">Selected GDS file:</label>
+                    <input type="file" class="filepath" id="myfile" name="myfile" accept=".gds">
+                    <!-- <input type="submit" value="Upload File"> -->
+                </form>
+                <form class="M1">
+                    <h4>M1</h4>
+                    <input type="number" class="offset" id="offsetM1" placeholder="Offset" name="Offset_M1">
+                    <br>
+                    <input type="number" class="height" id="height1" placeholder="Height" name="Height_M1">
+                </form>
+                <form class="M2">
+                    <h4>M2</h4>
+                    <input type="number" class="offset" id="offsetM2" placeholder="Offset" name="Offset_M2">
+                    <br>
+                    <input type="number" class="height" id="heightM2"placeholder="Height" name="Height_M2">
+                </form>
+                <form class="V1-V2">
+                    <h4>V1-V2</h4>
+                    <input type="number" class="offset" id="offsetV1V2" placeholder="Offset" name="Offset_V1V2">
+                    <br>
+                    <input type="number" class="height" id="heightV1V2"placeholder="Height" name="Height_V1V2">
+                </form>
+                <a href="/" ><button class="home_button"> Go Home</button></a>
+            </div>
+            <div class="whitespace">
+                
+            </div>
+        </div>
+    </body>
+</html>
