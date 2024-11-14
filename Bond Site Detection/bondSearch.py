@@ -70,7 +70,7 @@ for idx, shape in enumerate(top_cell.shapes(layer2).each()):
     shape1_left = len(shapes1) - len(shape1_left_set)
 end_time=datetime.now()
 print('Duration of Layer 2 enumeration: {}'.format(end_time - start_time))
-ly.write("MELD_V0_out_modified.gds")
+ly.write("MELD_V0_out.gds")
 print(f'full_match : {full_match }')
 print(f'offset_match : {offset_match }')
 print(f'shape1_unmatched : {shape1_left }')
@@ -100,6 +100,8 @@ total_fullmatch=0
 total_offsetmatch=0
 classify_sites=[]
 unique_sites=[]
+unique_sites_dict={}
+count=0
 for i in range(0,len(intersecting_site)):
     a=intersecting_site[i][0].bbox()
     b=intersecting_site[i][1].bbox()
@@ -126,6 +128,8 @@ for i in range(0,len(intersecting_site)):
             continue
         else:
             unique_sites.append(site)
+            unique_sites_dict[count]={"Type Match":"Full Match","Shape 1 type:":c,"Shape 1 bounds:":a,"Shape 2 type":d,"Shape 2 bounds:":b, "Area of Intersection:":effective_area}
+            count+=1
     else:
         site=["OM",effective_area,c,d]#intersecting_site[i][0],intersecting_site[i][1]] need to get the shape of these to ensure they are not the same
         alt_site=["OM",effective_area,d,c]
@@ -135,6 +139,8 @@ for i in range(0,len(intersecting_site)):
             continue
         else:
             unique_sites.append(site)
+            unique_sites_dict[count]={"Type Match:":"Offset Match","Shape 1 type:":c,"Shape 1 bounds:":a,"Shape 2 type":d,"Shape 2 bounds:":b, "Area of Intersection:":effective_area}
+            count+=1
 end_time=datetime.now()
 
 # print(unique_sites)
@@ -143,3 +149,5 @@ print("Full Matched:",total_fullmatch)
 print("Offset Matched:",total_offsetmatch)
 # print(classify_sites[22])
 print("Total time:",(end_time-start_time))
+print(unique_sites_dict)
+print(unique_sites_dict[2])

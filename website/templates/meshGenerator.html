@@ -4,6 +4,7 @@
         <title>Mesh Generator</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
         <style>
             .topbar{
                 width:100%;
@@ -24,10 +25,97 @@
                 padding-left:50vw;
             }
             .topbar img{
-                width: 10%;
-                height:10%; 
+                width: 228px;
+                height: 52px; 
+                flex-shrink:0; 
             }
-        
+            .inner-body{
+                display:flex;
+                flex-direction: row;
+            }
+            body{
+                background-color: #D9D9D9;
+            }
+            .left-side-box{
+                display:flex;
+                flex-direction: column;
+                border-right:solid black;
+                padding-left: 1rem;
+                padding-right: 1rem;
+                width: 300px;
+                height: 95vh;
+            }
+            .whitespace{
+                background-color: white;
+                width:90vw;
+                height: 95vh;
+            }
+          .P{
+                display: inline-flex;
+                flex-direction: column;
+                height: 125px;
+                min-width: 300px;
+                align-items: flex-start;
+                flex-shrink: 0;
+                background-color: white;
+                border-radius: 5%;
+                border: solid gray;
+                font-family: Inter;
+                font-size: 24px;
+                font-style: normal;
+                font-weight: 300;
+                line-height: normal;
+                padding-left: 24px;
+                padding-right:24px;
+                padding-bottom:24px;
+            }
+            .header{
+                display:flex;
+                align-self: center;
+                justify-content: center;
+
+            }
+            .parameters_cd{
+                display:flex;
+                flex-direction: row;
+                justify-content:space-between;
+                padding-right: 1rem;
+                padding-left: 1rem;
+            
+            }
+            .parameters_over{
+                display:flex;
+                flex-direction: row;
+                justify-content:space-between;
+                padding-right: 1rem;
+                padding-left: 1rem;
+            }
+            .parameters_recess{
+                display:flex;
+                flex-direction: row;
+                justify-content:space-between;
+                padding-right: 1rem;
+                padding-left: 1rem;
+            }
+ 
+            .spacer{
+                padding-top: 1rem;
+                padding-bottom: 1rem;
+            }
+            .Die1_P{
+                display:flex;
+                flex-direction: row;
+                justify-content:space-between;
+                padding-right: 1rem;
+                padding-left: 1rem;
+            }
+            .Die2_P{
+                display:flex;
+                flex-direction: row;
+                justify-content:space-between;
+                padding-right: 1rem;
+                padding-left: 1rem;
+            }
         </style>
     </head>
     <body>  
@@ -35,8 +123,256 @@
             <img src="/static/SiClarity-Logo.png" alt="SiClarity-Logo"/>
             <h1>MELD</h1>
         </div>
-        <h1>Mesh Generator</h1>
-        <a href="/" ><button class="home_button"> Go Home</button></a>
-        <button class="button2" type="button"> Create your own </button>
+        <div class="inner-body">
+            <div class="left-side-box">
+             <h1>Mesh Generator</h1>
+                <a href="/" ><button class="home_button"> Go Home</button></a>
+                <div class="output">
+                    <p>SiO2 top height: <span id="outputValue">Nothing entered yet</span></p>
+                </div>
+            <button class="button2" type="button" onclick="validateInputs()"> Create your mesh </button>
+            </div>
+            <div class="whitespace">
+                <div class="header">
+                    <h2>Model Parameters</h2>
+                </div>
+                <div class="parameters">
+                    <div class="parameters_cd">
+                        <form class="P">
+                            <h4>CD</h4>
+                            <input type="number" class="cd" id="cd" placeholder="Not implemented yet" name="cd">
+                        </form>
+                        <form class="P">
+                            <h4> CD variability</h4>
+                            <input type="number" class="cd_var" id="cd_var" placeholder="Not implemented yet" name="cd_var">
+                        </form>
+                        <form class="P">
+                            <h4> CD Steps</h4>
+                            <input type="number" class="cd_step" id="cd_step" placeholder="Not implemented yet" name="cd_step">
+                        </form>
+                    </div>
+                    <div class="spacer"></div>
+                    <div class="parameters_over">
+                        <form class="P">
+                            <h4>Overlay</h4>
+                            <input type="number" class="overlay_x" id="overlay_x" placeholder="x offset" name="overlay_x">
+                            <input type="number" class="overlay_y" id="overlay_y" placeholder="y offset" name="overlay_y">
+                        </form>
+                        <form class="P">
+                            <h4> Overlay variability</h4>
+                            <input type="number" class="overlay_var" id="overlay_var" placeholder="Not implemented yet" name="overlay_var">
+                        </form>
+                        <form class="P">
+                            <h4> Overlay Steps</h4>
+                            <input type="number" class="overlay_step" id="overlay_step" placeholder="Not implemented yet" name="overlay_step">
+                        </form>
+                    </div>
+                    <div class="spacer"></div>
+                    <div class="parameters_recess">
+                        <form class="P">
+                            <h4> Recess Variability</h4>
+                            <input type="number" class="recess_variability" id="recess_variability" placeholder="Not implemented yet" name="recess_variability">
+                        </form>
+                            <form class="P">
+                            <h4> Recess Variation</h4>
+                            <div class="dropdown">
+                                <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" id="dropdownMenuButton">Recess Shape</button>
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                  <li><button class="dropdown-item" type="button" onclick="updateDropdown('Ellipse')">Ellipse</button></li>
+                                  <li><button class="dropdown-item" type="button" onclick="updateDropdown('Square')">Square</button></li>
+                                  <li><button class="dropdown-item" type="button" onclick="updateDropdown('Sphere')">Sphere</button></li>
+                                </ul>
+                              </div>
+                        </form>
+                    </div>
+                    <div class="Die_text">
+                        <h2>Die 1 Parameters</h2>
+                    </div>
+                    <div class="Die1_P">
+                        <form class="P">
+                            <h4>SiO2 Height</h4>
+                            <input type="number" class="sio2h1" id="sio2h1" placeholder="10" name="sio2h1">
+                        </form>
+                        <form class="P">
+                            <h4>SiO2 Width</h4>
+                            <input type="number" class="sio2w1" id="sio2w1" placeholder="10" name="sio2w1">
+                        </form>
+                        <form class="P">
+                            <h4>SiO2 depth</h4>
+                            <input type="number" class="sio2d1" id="sio2d1" placeholder="15" name="sio2d1">
+                        </form>
+                        <form class="P">
+                            <h4>Copper Radius</h4>
+                            <input type="number" class="cr1" id="cr1" placeholder="2" name="cr1">
+                        </form>
+                        <form class="P">
+                            <h4>Copper Height</h4>
+                            <input type="number" class="ch1" id="ch1" placeholder="10" name="ch1">
+                        </form>
+                        <form class="P">
+                            <h4>Copper Recess</h4>
+                            <input type="number" class="cd1" id="cd1" placeholder="Input is in nm" name="cd1">
+                        </form>
+                    </div>
+                    <div class="Die_text">
+                        <h2>Die 2 Parameters</h2>
+                    </div>
+                    <div class="Die2_P">
+                        <form class="P">
+                            <h4>SiO2 Height</h4>
+                            <input type="number" class="sio2h2" id="sio2h2" placeholder="10" name="sio2h2">
+                        </form>
+                        <form class="P">
+                            <h4>SiO2 Width</h4>
+                            <input type="number" class="sio2w2" id="sio2w2" placeholder="10" name="sio2w2">
+                        </form>
+                        <form class="P">
+                            <h4>SiO2 depth</h4>
+                            <input type="number"  class="sio2d2" id="sio2d2" placeholder="15" name="sio2d2">
+                        </form>
+                        <form class="P">
+                            <h4>Copper Radius</h4>
+                            <input type="number"  class="cr2" id="cr2" placeholder="2" name="cr2">
+                        </form>
+                        <form class="P">
+                            <h4>Copper Height</h4>
+                            <input type="number" class="ch2" id="ch2" placeholder="10" name="ch2">
+                        </form>
+                        <form class="P">
+                            <h4>Copper Recess</h4>
+                            <input type="number"  class="cd2" id="cd2" placeholder="Input is in nm" name="cd2">
+                        </form>
+                    </div>
+
+            </div>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+        <script>
+            let sio2h1=''
+            let sio2w1=''
+            let sio2d1=''
+            let cr1=''
+            let ch1=''
+            let cd1=''
+            let sio2h2=''
+            let sio2w2=''
+            let sio2d2=''
+            let cr2=''
+            let ch2=''
+            let cd2=''
+            function updateDropdown(choice) {
+                // Find the dropdown button by its ID
+                var dropdownButton = document.getElementById('dropdownMenuButton');
+                
+                // Update the button text with the selected choice
+                dropdownButton.textContent = choice;
+            }
+
+            function validateInputs(){
+                // var topSiO2h=document.getElementById('sio2h1');
+                // var topSiO2w=document.getElementById('sio2w1');
+                // var topSiO2d=document.getElementById('sio2d1');
+                // var topCur=document.getElementById('cr1');
+                // var topCuh=document.getElementById('ch1');
+                // var topCu_recess=document.getElementById('crd1');
+                // var botSiO2h=document.getElementById('sio2h2');
+                // var botSiO2w=document.getElementById('sio2w2');
+                // var botSiO2d=document.getElementById('sio2d2');
+                // var botCur=document.getElementById('cr2');
+                // var botCuh=document.getElementById('ch2');
+                // var botCu_recess=document.getElementById('crd2');
+                var topSiO2h=sio2h1;
+                var topSiO2w=sio2w1;
+                var topSiO2d=sio2d1;
+                var topCur=cr1;
+                var topCuh=ch1;
+                var topCu_recess=cd1;
+                var botSiO2h=sio2h2;
+                var botSiO2w=sio2w2;
+                var botSiO2d=sio2d2;
+                var botCur=cr2;
+                var botCuh=ch2;
+                var botCu_recess=cd2;
+
+                if(botSiO2d-0.2 < botCuh){
+                    document.getElementById('sio2d2').innerHTML="The depth value of your bottom SiO2 block must be greater than the bottom Copper height by 0.2"
+                }
+                if(topSiO2d-0.2 < topCuh){
+                    document.getElementById('sio2d1').innerHTML="The depth value of your top SiO2 block must be greater than the top Copper height by 0.2"
+                }
+                var r_check_top=Math.min(topSiO2h,topSiO2w);
+                var r_check_bot=Math.min(botSiO2h,botSiO2w);
+                if(2*3.14159* topCur> r_check_top){
+                    if (r_check_top==topSiO2h){
+                        document.getElementById('sio2h1').innerHTML="The height value of your top SiO2 block must be greater than the top Copper radius*2pi"
+                    }
+                    else{
+                        document.getElementById('sio2w1').innerHTML="The width value of your top SiO2 block must be greater than the top Copper radius*2pi"
+                    }
+                }
+                if(2*3.14159* botCur> r_check_bot){
+                    if (r_check_bot==botSiO2h){
+                        document.getElementById('sio2h2').innerHTML="The height value of your bottom SiO2 block must be greater than the bottom Copper radius*2pi"
+                    }
+                    else{
+                        document.getElementById('sio2w2').innerHTML="The width value of your bottom SiO2 block must be greater than the bottom Copper radius*2pi"
+                    }
+                }
+            }
+            function handleInputChange(event) {
+                const input = event.target.id;
+                const inputValue=event.target.value;
+                const output = document.getElementById('outputValue');
+
+                // Check if the input is not empty and run any logic you need
+                if(input=='sio2h1'){
+                    sio2h1=inputValue;
+                }
+                if(input=='sio2w1'){
+                    sio2w1=inputValue;
+                }
+                if(input=='sio2d1'){
+                    sio2d1=inputValue;
+                }
+                if(input=='cr1'){
+                    cr1=inputValue;
+                }
+                if(input=='cd1'){
+                    cd1=inputValue;
+                }
+                if(input=='ch1'){
+                    ch1=inputValue;
+                }
+                if(input=='sio2h2'){
+                    sio2h2=inputValue;
+                }
+                if(input=='sio2w2'){
+                    sio2w2=inputValue;
+                }
+                if(input=='sio2d2'){
+                    sio2d2=inputValue;
+                }
+                if(input=='cr2'){
+                    cr2=inputValue;
+                }
+                if(input=='cd2'){
+                    cd2=inputValue;
+                }
+                if(input=='ch2'){
+                    ch2=inputValue;
+                }
+                
+                // if (inputValue.trim() !== '') {
+                //     output.textContent = `You typed: ${inputValue}`;
+                // } 
+                // else {
+                //     output.textContent = 'Nothing entered yet';
+                // }
+            }
+            const inputs = document.querySelectorAll('input')
+            inputs.forEach(input => {
+                input.addEventListener('change', handleInputChange);
+            });
+        </script>
     </body>
 </html>

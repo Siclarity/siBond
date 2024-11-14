@@ -4,6 +4,7 @@
         <title>Upload GDS File</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
         <style>
             .topbar{
                 width:100%;
@@ -24,8 +25,9 @@
                 padding-left:50vw;
             }
             .topbar img{
-                width: 10%;
-                height:10%; 
+                width: 228px;
+                height: 52px; 
+                flex-shrink:0;
             }
             body{
                 background-color: #D9D9D9;
@@ -43,8 +45,10 @@
                 display:flex;
                 flex-direction: column;
                 border-right:solid black;
+                padding-left: 1rem;
+                padding-right: 1rem;
             }
-            .left-side-box form{
+            .left-side-box .File_input{
                 color: #000;
                 font-family: Inter;
                 font-size: 24px;
@@ -65,7 +69,26 @@
                 padding-top:10vh;
             }
             .left-side-box .spacer{
-                padding-bottom: 15vh;
+                padding-bottom: 10vh;
+            }
+
+            .left-side-box .M{
+                display: inline-flex;
+                flex-direction: column;
+                height: 154px;
+                min-width: 320px;
+                align-items: flex-start;
+                flex-shrink: 0;
+                background-color: white;
+                border-radius: 5%;
+                font-family: Inter;
+                font-size: 24px;
+                font-style: normal;
+                font-weight: 300;
+                line-height: normal;
+                padding-left: 24px;
+                padding-right:24px;
+                padding-bottom:24px;
             }
         </style>
     </head>
@@ -82,19 +105,22 @@
                     <input type="file" class="filepath" id="myfile" name="myfile" accept=".gds">
                     <!-- <input type="submit" value="Upload File"> -->
                 </form>
-                <form class="M1">
+                <div class="spacer"></div>
+                <form class="M">
                     <h4>M1</h4>
                     <input type="number" class="offset" id="offsetM1" placeholder="Offset" name="Offset_M1">
                     <br>
                     <input type="number" class="height" id="height1" placeholder="Height" name="Height_M1">
                 </form>
-                <form class="M2">
+                <div class="spacer"></div>
+                <form class="M">
                     <h4>M2</h4>
                     <input type="number" class="offset" id="offsetM2" placeholder="Offset" name="Offset_M2">
                     <br>
                     <input type="number" class="height" id="heightM2"placeholder="Height" name="Height_M2">
                 </form>
-                <form class="V1-V2">
+                <div class="spacer"></div>
+                <form class="M">
                     <h4>V1-V2</h4>
                     <input type="number" class="offset" id="offsetV1V2" placeholder="Offset" name="Offset_V1V2">
                     <br>
@@ -103,8 +129,9 @@
                 <a href="/" ><button class="home_button"> Go Home</button></a>
             </div>
             <div class="whitespace">
-                
+                <button onclick="IdentifyUniqueBondingSites()"> Identify Unique Bonding Sites</button>
             </div>
         </div>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     </body>
 </html>
