@@ -91,6 +91,39 @@
                 padding-bottom:24px;
             }
         </style>
+        <script>
+            // Function to handle form submission
+            function handleFormSubmit(event) {
+                event.preventDefault(); // Prevent the default form submission
+    
+                // Get the value from the input field
+                const projectFilepath = document.getElementById('myfile').value;
+    
+                // Make an AJAX POST request using fetch
+                fetch('/getFile', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ file: projectFilepath })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Network response was not ok: " + response.statusText);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Handle the response data
+                    alert("Success: " + JSON.stringify(data));
+                })
+                .catch(error => {
+                    // Handle any errors
+                    console.error("Error:", error);
+                    alert("Error: " + error.message);
+                });
+            }
+        </script>
     </head>
     <body>  
         <div class="topbar">
@@ -100,11 +133,14 @@
         <div class="inner-body">
             <div class="left-side-box">
                 <div class="spacer"></div>
-                <form class="File_input">
+                <form class="File_input" method="POST" enctype="multipart/form-data" onsubmit="handleFormSubmit(event)">
                     <label for="myfile">Selected GDS file:</label>
-                    <input type="file" class="filepath" id="myfile" name="myfile" accept=".gds">
+                    <input type="file" class="filepath" id="myfile" name="file" accept=".gds">
                     <!-- <input type="submit" value="Upload File"> -->
+                    <!-- <button type="submit" onclick="getFile()">Upload File</button> -->
+                    <button type="submit" class="home_button" onclick="callBackendAPI()"> Upload File</button>
                 </form>
+                
                 <div class="spacer"></div>
                 <form class="M">
                     <h4>M1</h4>
@@ -129,9 +165,32 @@
                 <a href="/" ><button class="home_button"> Go Home</button></a>
             </div>
             <div class="whitespace">
-                <button onclick="IdentifyUniqueBondingSites()"> Identify Unique Bonding Sites</button>
+                <button id="bondSearch" onclick="IdentifyUniqueBondingSites()"> Identify Unique Bonding Sites</button>
             </div>
         </div>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+           
+        <script>
+        // document.getElementById('bondSearch').addEventListener('click', function(){
+        //     alert('Running BondSearch');
+        // });
+        function callBackendAPI() {
+            fetch('/getFile')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert("API call successful! Data: " + JSON.stringify(data.data));
+                    } else {
+                        alert("Error: " + data.error);
+                    }
+                })
+                .catch(error => {
+                    alert("Failed to call API: " + error);
+                });
+        }
+ 
+
+        </script>
+        
     </body>
 </html>

@@ -136,7 +136,15 @@
             .conflict-border{
                 border-color:#e6b800;
             }
-
+            #submitButton {
+            background-color: gray;
+            color: white;
+            cursor: not-allowed;
+            }
+            #submitButton.active {
+                background-color: blue;
+                cursor: pointer;
+            }
         </style>
     </head>
     <body>  
@@ -146,9 +154,12 @@
         </div>
         <div class="inner-body">
             <div class="left-side-box">
-             <h1>Mesh Generator</h1>
+                <h1>Mesh Generator</h1>
                 <a href="/" ><button class="home_button"> Go Home</button></a>
-            <button class="button2" type="button" onclick="validateInputs()"> Create your mesh </button>
+                <div class="spacer"></div>
+                <button class="button2" type="button" onclick="validateInputs()"> Validate your Parameters </button>
+                <div class="spacer"></div>
+                <button id="submitButton" disabled>Create your mesh</button>
             </div>
             <div class="whitespace">
                 <div class="header">
@@ -173,8 +184,8 @@
                     <div class="parameters_over">
                         <form class="P" id="overlay">
                             <h4>Overlay</h4>
-                            <input type="number" class="overlay_x" id="overlay_x" placeholder="x offset" name="overlay_x">
-                            <input type="number" class="overlay_y" id="overlay_y" placeholder="y offset" name="overlay_y">
+                            <input type="number" class="overlay_x" id="overlay_x" placeholder="x offset default(0)" name="overlay_x">
+                            <input type="number" class="overlay_y" id="overlay_y" placeholder="y offset default(0)" name="overlay_y">
                         </form>
                         <form class="P" id="overlay var">
                             <h4> Overlay variability</h4>
@@ -193,7 +204,7 @@
                         </form>
                             <form class="P" id="Recess variation">
                             <h4> Recess Variation</h4>
-                            <div class="dropdown">
+                            <div class="dropdown" id="Recess Options">
                                 <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" id="dropdownMenuButton">Recess Shape</button>
                                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                                   <li><button class="dropdown-item" type="button" onclick="updateDropdown('Ellipse')">Ellipse</button></li>
@@ -339,6 +350,10 @@
                 const k= document.getElementById('Bot Copper Height');
                 const l= document.getElementById('Bot Copper Recess');
 
+                const m=document.getElementById("Recess variation");
+                const n=document.getElementById("overlay");
+                var recess_opt=false;
+                var overlay=false;
                 if(topSiO2h <= 0 || topSiO2h==''){
                     a.classList.remove('neutral-border');
                     a.classList.remove('true-border');
@@ -573,12 +588,50 @@
                     l.classList.add('true-border');
                     brecess=true;
                 }
+                if(r_shape==''){
+                    m.classList.remove('neutral-border');
+                    m.classList.remove('true-border');
+                    m.classList.remove('conflict-border');
+                    m.classList.add('false-border');
+                    recess_opt=false;
+                }
+                else{
+                    m.classList.remove('neutral-border');
+                    m.classList.remove('false-border');
+                    m.classList.remove('conflict-border');
+                    m.classList.add('true-border');
+                    recess_opt=true;
+                }
+                if((Math.abs(ox)>=(topCur*0.5)&& Math.abs(oy)>=(0.5*topCur)) ||(Math.abs(ox)>=(botCur*0.5)&& Math.abs(oy)>=(0.5*botCur))){
+                    n.classList.remove('neutral-border');
+                    n.classList.remove('true-border');
+                    n.classList.remove('conflict-border');
+                    n.classList.add('false-border');
+                    overlay=false;
+                }
+                else if((Math.abs(ox)<=(topCur*0.5)&&Math.abs(oy)>=(0.5*topCur)) ||(Math.abs(ox)>=(topCur*0.5)&&Math.abs(oy)<=(0.5*topCur))||(Math.abs(ox)<=(botCur*0.5)&&Math.abs(oy)>=(0.5*botCur)) ||(Math.abs(ox)>=(botCur*0.5)&&Math.abs(oy)<=(0.5*topCur))){
+                    n.classList.remove('neutral-border');
+                    n.classList.remove('true-border');
+                    n.classList.remove('false-border');
+                    n.classList.add('conflict-border');
+                    overlay=false;
+                }
+                else{
+                    n.classList.remove('neutral-border');
+                    n.classList.remove('false-border');
+                    n.classList.remove('conflict-border');
+                    n.classList.add('true-border');
+                    overlay=true;
+                }
                 const top_valid=(tsw&&tsh&&tsd&&tcr&&tcd);
                 const bot_valid=(bsw&&bsh&&bsd&&bcr&&bcd);
                 const bot_cop_valid=(bot_conflict_h || bot_conflict_r||(!trecess));
                 const top_cop_valid=(top_conflict_h||top_conflict_r ||(!brecess));
-                if(top_valid && bot_valid && !bot_cop_valid &&!top_cop_valid){
+                const submitButton=document.getElementById('submitButton');
+                if(top_valid && bot_valid && !bot_cop_valid &&!top_cop_valid &&recess_opt &&overlay){
                     console.log(`Can generate the mesh`);
+                    submitButton.disabled=false;
+                    submitButton.classList.add('active');
                 }
                 if(!top_valid){
                     console.log(`Issue with top mesh inputs`);
@@ -587,95 +640,141 @@
                     console.log(`${tsd}`);
                     console.log(`${tcr}`);
                     console.log(`${tcd}`);
+                    submitButton.disabled=true;
                 }
                 if(!bot_valid){
                     console.log(`Issue with bottom mesh inputs`);
+                    submitButton.disabled=true;
+                    submitButton.classList.remove('active');
                 }
                 if(top_cop_valid){
                     console.log(`Issue with the top copper dimensions`);
+                    submitButton.disabled=true;
+                    submitButton.classList.remove('active');
                 }
                 if(bot_cop_valid){
                     console.log(`Issue with the bottom copper dimensions`);
+                    submitButton.disabled=true;
+                    submitButton.classList.remove('active');
+                }
+                if(!recess_opt){
+                    console.log(`Issue with the recess option`);
+                    submitButton.disabled=true;
+                    submitButton.classList.remove('active');
+                }
+                if(!recess_opt){
+                    console.log(`Issue with the ovelay options`);
+                    submitButton.disabled=true;
+                    submitButton.classList.remove('active');
                 }
                 console.log(`${r_shape}`); 
 
             }
+            
+            document.getElementById('submitButton').addEventListener('click', function() {
+                if (!this.disabled) {
+                    alert("Form submitted!");
+                    let topSiO2={
+                        SiO2h:sio2h1,
+                        SiO2w:sio2w1,
+                        SiO2l:sio2d1,
+                        CopperR:cr1,
+                        CopperH:ch1,
+                        RecessShape:recess_shape,
+                        Recess:cd1
+                    }
+                    let botSiO2={
+                        SiO2h:sio2h2,
+                        SiO2w:sio2w2,
+                        SiO2l:sio2d2,
+                        CopperR:cr2,
+                        CopperH:ch2,
+                        RecessShape:recess_shape,
+                        Recess:cd2
+                    }
+                    alert(JSON.stringify(topSiO2,null, 2));
+                    alert(JSON.stringify(botSiO2,null, 2));
+                }
+            });
 
             document.body.addEventListener('input', function(e) {
-            // Ensure the event target is a number input
-            if (e.target.tagName.toLowerCase() === 'input' && e.target.type === 'number') {
-                
-                // Get the form the input belongs to
-                const form = e.target.closest('form');
-                
-                if (form) {
-                    const formId = form.id; // Form ID to identify which form triggered the change
-                    const inputValue = e.target.value; // Get the new input value as a float
+                // Ensure the event target is a number input
+                const submitButton=document.getElementById('submitButton');
+                submitButton.disabled=true;
+                submitButton.classList.remove('active');
+                if (e.target.tagName.toLowerCase() === 'input' && e.target.type === 'number') {
+                    
+                    // Get the form the input belongs to
+                    const form = e.target.closest('form');
+                    
+                    if (form) {
+                        const formId = form.id; // Form ID to identify which form triggered the change
+                        const inputValue = e.target.value; // Get the new input value as a float
 
-                    // Update variables and output based on form ID and input value
-                    switch (formId) {
-                        case 'Top SiO2 Height':
-                            sio2h1 = inputValue; 
-                            console.log(`Top SiO2 Height: ${sio2h1}`); 
-                            break;
-                        case 'Top SiO2 Width':
-                            sio2w1 = inputValue; 
-                            console.log(`Top SiO2 Width: ${sio2w1}`); 
-                            break;
-                        case 'Top SiO2 Depth':
-                            sio2d1 = inputValue; 
-                            console.log(`Top SiO2 Depth: ${sio2d1}`);  
-                            break;
-                       
-                        case 'Top Copper Radius':
-                            cr1 = inputValue; 
-                            console.log(`Top Copper Radius: ${cr1}`);  
-                            break;
-                        case 'Top Copper Height':
-                            ch1 = inputValue; 
-                            console.log(`Top Copper Height: ${ch1}`);  
-                            break; 
-                        case 'Top Copper Recess':
-                            cd1 = inputValue; 
-                            console.log(`Top Copper Recess: ${cd1}`);  
-                            break;
-                         case 'Bot SiO2 Height':
-                            sio2h2 = inputValue; 
-                            console.log(`Bot SiO2 Height: ${sio2h2}`); 
-                            break;
-                        case 'Bot SiO2 Width':
-                            sio2w2 = inputValue; 
-                            console.log(`Bot SiO2 Width: ${sio2w2}`); 
-                            break;
-                        case 'Bot SiO2 Depth':
-                            sio2d2 = inputValue; 
-                            console.log(`Bot SiO2 Depth: ${sio2d2}`);  
-                            break;
-                       
-                        case 'Bot Copper Radius':
-                            cr2 = inputValue; 
-                            console.log(`Bot Copper Radius: ${cr2}`);  
-                            break;
-                        case 'Bot Copper Height':
-                            ch2 = inputValue; 
-                            console.log(`Bot Copper Height: ${ch2}`);  
-                            break; 
-                        case 'Bot Copper Recess':
-                            cd2 = inputValue; 
-                            console.log(`Bot Copper Recess: ${cd2}`);  
-                            break;
-                        case 'overlay':
-                            ox=document.getElementById('overlay_x').value
-                            oy=document.getElementById('overlay_y').value
-                            console.log(`Overlay X ${ox} Overlay y ${oy}`)
-                            break;
-                        // Add cases for additional forms as integration of other inputs progress
-                        default:
-                            break;
+                        // Update variables and output based on form ID and input value
+                        switch (formId) {
+                            case 'Top SiO2 Height':
+                                sio2h1 = inputValue; 
+                                console.log(`Top SiO2 Height: ${sio2h1}`); 
+                                break;
+                            case 'Top SiO2 Width':
+                                sio2w1 = inputValue; 
+                                console.log(`Top SiO2 Width: ${sio2w1}`); 
+                                break;
+                            case 'Top SiO2 Depth':
+                                sio2d1 = inputValue; 
+                                console.log(`Top SiO2 Depth: ${sio2d1}`);  
+                                break;
+                        
+                            case 'Top Copper Radius':
+                                cr1 = inputValue; 
+                                console.log(`Top Copper Radius: ${cr1}`);  
+                                break;
+                            case 'Top Copper Height':
+                                ch1 = inputValue; 
+                                console.log(`Top Copper Height: ${ch1}`);  
+                                break; 
+                            case 'Top Copper Recess':
+                                cd1 = inputValue; 
+                                console.log(`Top Copper Recess: ${cd1}`);  
+                                break;
+                            case 'Bot SiO2 Height':
+                                sio2h2 = inputValue; 
+                                console.log(`Bot SiO2 Height: ${sio2h2}`); 
+                                break;
+                            case 'Bot SiO2 Width':
+                                sio2w2 = inputValue; 
+                                console.log(`Bot SiO2 Width: ${sio2w2}`); 
+                                break;
+                            case 'Bot SiO2 Depth':
+                                sio2d2 = inputValue; 
+                                console.log(`Bot SiO2 Depth: ${sio2d2}`);  
+                                break;
+                        
+                            case 'Bot Copper Radius':
+                                cr2 = inputValue; 
+                                console.log(`Bot Copper Radius: ${cr2}`);  
+                                break;
+                            case 'Bot Copper Height':
+                                ch2 = inputValue; 
+                                console.log(`Bot Copper Height: ${ch2}`);  
+                                break; 
+                            case 'Bot Copper Recess':
+                                cd2 = inputValue; 
+                                console.log(`Bot Copper Recess: ${cd2}`);  
+                                break;
+                            case 'overlay':
+                                ox=document.getElementById('overlay_x').value
+                                oy=document.getElementById('overlay_y').value
+                                console.log(`Overlay X ${ox} Overlay y ${oy}`)
+                                break;
+                            // Add cases for additional forms as integration of other inputs progress
+                            default:
+                                break;
+                        }
                     }
                 }
-            }
-        });
+            });
 
         </script>
     </body>
