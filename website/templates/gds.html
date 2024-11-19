@@ -97,15 +97,47 @@
                 event.preventDefault(); // Prevent the default form submission
     
                 // Get the value from the input field
-                const projectFilepath = document.getElementById('myfile').value;
-    
+                //const projectFilepath = document.getElementById('myfile').value;
+                //Get the file input element
+                const fileInput = document.getElementById('myfile');
+                //gets the selected file
+                const file=fileInput.files[0]
                 // Make an AJAX POST request using fetch
+                // fetch('/getFile', {
+                //     method: 'POST',
+                //     headers: {
+                //         'Content-Type': 'application/json'
+                //     },
+                //     body: JSON.stringify({ file: projectFilepath })
+                // })
+                // .then(response => {
+                //     if (!response.ok) {
+                //         throw new Error("Network response was not ok: " + response.statusText);
+                //     }
+                //     return response.json();
+                // })
+                // .then(data => {
+                //     // Handle the response data
+                //     alert("Success: " + JSON.stringify(data));
+                // })
+                // .catch(error => {
+                //     // Handle any errors
+                //     console.error("Error:", error);
+                //     alert("Error: " + error.message);
+                // });
+                //Checks to see if the file is selected
+                if(!file){
+                    alert("Please select a file to upload");
+                    return;
+                }
+                //Creates a FormData object to send the file which we also use in the form 
+                const formData = new FormData();
+                //Append the file to the FormData object
+                formData.append('file', file);
+                // Make an AJAX POST request using fetch with FormData
                 fetch('/getFile', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ file: projectFilepath })
+                    body: formData  // Send the FormData object containing the file
                 })
                 .then(response => {
                     if (!response.ok) {
@@ -135,10 +167,11 @@
                 <div class="spacer"></div>
                 <form class="File_input" method="POST" enctype="multipart/form-data" onsubmit="handleFormSubmit(event)">
                     <label for="myfile">Selected GDS file:</label>
-                    <input type="file" class="filepath" id="myfile" name="file" accept=".gds">
+                    <input type="file" class="filepath" id="myfile" name="file" accept=".gds"/>
                     <!-- <input type="submit" value="Upload File"> -->
                     <!-- <button type="submit" onclick="getFile()">Upload File</button> -->
-                    <button type="submit" class="home_button" onclick="callBackendAPI()"> Upload File</button>
+                    <!-- <button type="submit" class="home_button" onclick="callBackendAPI()"> Upload File</button> -->
+                    <button type="submit"> Upload File</button>
                 </form>
                 
                 <div class="spacer"></div>
