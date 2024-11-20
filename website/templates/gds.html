@@ -90,6 +90,7 @@
                 padding-right:24px;
                 padding-bottom:24px;
             }
+
         </style>
         <script>
             // Function to handle form submission
@@ -159,7 +160,7 @@
     </head>
     <body>  
         <div class="topbar">
-            <img src="/static/SiClarity-Logo.png" alt="SiClarity-Logo"/>
+            <img src="/static/images/SiClarity-Logo.png" alt="SiClarity-Logo"/>
             <h1>MELD</h1>
         </div>
         <div class="inner-body">
@@ -198,6 +199,13 @@
                 <a href="/" ><button class="home_button"> Go Home</button></a>
             </div>
             <div class="whitespace">
+                {% if image_filename %}
+                    <!-- Dynamically render the image if a PNG file is found -->
+                     <!-- <p>{ url_for('uploads', filename=image_filename) } </p> -->
+                    <img src="{{ url_for('static', filename='uploads/'+image_filename) }}" alt="Uploaded Image">
+                {% else %}
+                    <p>No PNG file found.</p>
+                {% endif %}
                 <button id="bondSearch" onclick="IdentifyUniqueBondingSites()"> Identify Unique Bonding Sites</button>
             </div>
         </div>
@@ -207,20 +215,20 @@
         // document.getElementById('bondSearch').addEventListener('click', function(){
         //     alert('Running BondSearch');
         // });
-        function callBackendAPI() {
-            fetch('/getFile')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert("API call successful! Data: " + JSON.stringify(data.data));
-                    } else {
-                        alert("Error: " + data.error);
-                    }
-                })
-                .catch(error => {
-                    alert("Failed to call API: " + error);
-                });
-        }
+        // function callBackendAPI() {
+        //     fetch('/getFile')
+        //         .then(response => response.json())
+        //         .then(data => {
+        //             if (data.success) {
+        //                 alert("API call successful! Data: " + JSON.stringify(data.data));
+        //             } else {
+        //                 alert("Error: " + data.error);
+        //             }
+        //         })
+        //         .catch(error => {
+        //             alert("Failed to call API: " + error);
+        //         });
+        // }
  
 
         </script>
