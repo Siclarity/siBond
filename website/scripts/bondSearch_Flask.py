@@ -22,11 +22,8 @@ def classification(a):
 
     return a
 
-def full_match(a,b):
-    c=a
-    d=b
-    #return(((c.left<=d.left<=c.right) and (c.left <=d.right<=c.right) and (c.bottom<=d.bottom<=c.top)  and (c.bottom<=d.top<=c.top)) or((d.left<=c.left<=d.right) and (d.left <=c.right<=d.right) and (d.bottom<=c.bottom<=d.top)  and (d.bottom<=c.top<=d.top)))
-    return ((c.left==d.left) and (c.bottom==d.bottom) and (c.right==d.right) and (c.top==d.top))
+# filename="..\\uploads\\CLIP.gds"
+filename="Test.gds"
 def search(filename):
     if(filename.lower().endswith('.gds')):
         rtree = index.Index()
@@ -34,6 +31,7 @@ def search(filename):
         ly.read(filename)
 
         top_cell = ly.top_cell()
+        top_cell.flatten(-1,True)
         layer1 = ly.layer(110, 0)
         layer2 = ly.layer(11, 0)
         layer3 = ly.layer(4,0) #intersection layer will be added
@@ -60,6 +58,7 @@ def search(filename):
         intersecting_site=[]
         full_match = 0 
         offset_match = 0
+        shape1_left=0
         shape1_left_set = set()
         shape2_left = 0
         shapes2=[]
@@ -96,8 +95,8 @@ def search(filename):
         print(f'offset_match : {offset_match }')
         print(f'shape1_unmatched : {shape1_left }')
         print(f'shape2_unmatched : {shape2_left }')
-
-
+        for items in intersecting_site:
+            print(items)
         start_time=datetime.now()
         total_fullmatch=0
         total_offsetmatch=0
@@ -106,23 +105,33 @@ def search(filename):
         unique_sites_dict={}
         count=0
         for i in range(0,len(intersecting_site)):
+            #print(f"Intersecting site:{i}")
             a=intersecting_site[i][0].bbox()
             b=intersecting_site[i][1].bbox()
             min_left=min(a.left,b.left)
+            #print(f"Min Left:{min_left}")
             max_left=max(a.left,b.left)
+            #print(f"Max Left:{max_left}")
             min_bot=min(a.bottom,b.bottom)
+            #print(f"Min Bot:{min_bot}")
             max_bot=max(a.bottom,b.bottom)
+            #print(f"Max Bot:{max_bot}")
             min_right=min(a.right,b.right)
+            #print(f"Min Right:{min_right}")
             max_right=max(a.right,b.right)
+            #print(f"Max Right:{max_right}")
             min_top=min(a.top,b.top)
+            #print(f"Min Top:{min_top}")
             max_top=max(a.top,b.top)
+            #print(f"Max Top:{max_top}")
             c=classification(intersecting_site[i][0])
             d=classification(intersecting_site[i][1])
             #effective_area=abs(abs((min_left-max_right)*(m_bot-max_top))-abs((abs(a.right-b.right)-abs(a.left-b.left))*(abs(a.top-b.top)-abs(a.bottom-b.bottom))))
             #effective_area=abs((abs((abs(a.right)-abs(b.right)))-abs((abs(a.left)-abs(b.left))))*abs((abs((abs(a.top)-abs(b.top)))-abs((abs(a.bottom)-abs(b.bottom))))))
-            effective_area=abs((abs(min_left)-abs(min_right))*(abs(min_bot)-abs(min_top)))
+            effective_area=abs((abs(max_left)-abs(min_right))*(abs(max_bot)-abs(min_top)))
             #if((min_left==a.left and min_bot==a.bottom and max_right==a.right and max_top==a.top) or (min_left==b.left and min_bot==b.bottom and max_right==b.right and max_top==b.top)):
-            if(full_match(a,b)):
+            print(f"{effective_area}, {i}")
+            if(a==b):
                 site=["FM",effective_area,c,d]#intersecting_site[i][0],intersecting_site[i][1]]
                 alt_site=["FM",effective_area,d,c]
                 classify_sites.append([site,a,b])
@@ -152,8 +161,12 @@ def search(filename):
         print("Offset Matched:",total_offsetmatch)
         # print(classify_sites[22])
         print("Total time:",(end_time-start_time))
-        print(unique_sites_dict)
-        print(unique_sites_dict[2])
-        return jsonify({"success":"Completed the Bond Search Algorithm","Full Matched":total_fullmatch,"Offset Matched":total_offsetmatch, "Total Number of Unique Sites":len(unique_sites), "List of unique bonding site":unique_sites})
+        #print(unique_sites_dict)
+        #print(unique_sites_dict[2])
+        for key ,value in unique_sites_dict.items():
+            print(f"{key}:{value}")
+        return({"success":"Completed the Bond Search Algorithm","Full Matched":total_fullmatch,"Offset Matched":total_offsetmatch, "Total Number of Unique Sites":len(unique_sites), "List of unique bonding site":unique_sites})
     else:
-         return jsonify({"error": "File must be a GDS (.gds) to run site classification"}), 400
+        print(filename)
+        return ({"error": "File must be a GDS (.gds) to run site classification"}), 400
+search(filename)

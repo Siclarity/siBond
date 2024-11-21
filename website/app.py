@@ -4,6 +4,8 @@ from os.path import isfile, join, isdir, exists
 from scripts.thumbnails import gds_to_image_klayout
 import shutil
 import pya
+from scripts.bondSearch_Flask import search
+
 # from mesh_Flask_gen import *
 app = Flask(__name__)
 
@@ -17,7 +19,8 @@ def clear_folder(folder_path):
         # Iterate over all the files and subdirectories in the folder
         for filename in listdir(folder_path):
             file_path = path.join(folder_path, filename)
-            
+            if filename=="sample.png":
+                continue
             # Check if it's a file or directory
             if path.isfile(file_path):
                 remove(file_path)  # Delete file
@@ -42,22 +45,26 @@ def gds():
     # Find the first .png file in the folder
     image_filename = None
     for filename in files_in_folder:
-        if filename.endswith('.png'):
+        print(filename)
+        if filename.endswith('.png') and filename!='sample.png':
             image_filename = filename
             #image_filename=f'uploads\\{image_filename}'
             break  # Exit loop after finding the first .png file
 
     # If no .png file is found, handle the case where the folder is empty or has no .png files
     if not image_filename:
-        image_filename = None  # You can set this to a default value or leave it as None
-    print(image_filename)
+        image_filename = "sample.png"  # You can set this to a default value or leave it as None
+    print("GDS.html:",image_filename)
     # Pass the image filename (or None) to the template
-    return render_template('gds.html',image_filename=image_filename)
+    if request.method=='POST':
+        return jsonify({'image_filename':image_filename})
+    else:
+        return render_template('gds.html',image_filename=image_filename)
 
-@app.route('/static/uploads/<filename>')
+@app.route('/uploads/<filename>')
 def uploaded_file(filename):
     # Serve the file from the uploads folder
-    print(filename)
+    print("Serving:",filename)
     return send_from_directory(app.config['Uploaded_GDS'], filename)
 
 @app.route('/getFile',methods=['GET','POST'])
@@ -98,12 +105,25 @@ def getFile():
                 #cwd = getcwd()
                 system(f"C:\\Users\\aneal\\AppData\\Roaming\\KLayout\\klayout_app.exe -z -r {cwd}/scripts/thumbnails.py  -rd gds_folder={cwd}\\uploads")
                 return jsonify({"success": "File uploaded successfully","filename":filename, "Image status:":"Please Refresh your browser to see the image of the GDS file"})
+
             except Exception as e:
                 print("Error while saving file:", e)
                 return jsonify({"error": "File upload failed"}), 500
             #run bondsearch here
     #return render_template('gds.html')
         #return jsonify({"success": False})
+
+@app.route('/search')
+def search_sites():
+    files_in_folder = listdir(app.config['Uploaded_GDS'])
+    # Find the .gds file in the folder
+    gds_filename = None
+    for filename in files_in_folder:
+        if filename.endswith('.gds'):
+            gds_filename=f"uploads/{filename}"
+            c=search(gds_filename)
+    return jsonify({"Result":c})
+
 @app.route('/meshGenerator')
 def meshGenerator():
 

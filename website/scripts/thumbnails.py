@@ -2,7 +2,7 @@ import pya
 from os import listdir
 from os.path import join, isfile
 
-def gds_to_image_klayout(gds_files_path, layer_properties, width=23000, height=23000):
+def gds_to_image_klayout(gds_files_path, layer_properties, width=1000, height=1000):
     app = pya.Application.instance()
     mw = app.main_window()
     files = [join(gds_files_path, name) for name in listdir(gds_files_path) if isfile(join(gds_files_path, name)) and name.endswith('.gds')]
