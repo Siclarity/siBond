@@ -39,13 +39,6 @@ def search(filename):
         layer2 = ly.layer(11, 0)
         layer3 = ly.layer(4,0) #intersection layer will be added
         shapes1 = []
-
-                
-        view=lay.LayoutView()
-        view.layout = ly
-        folderpath="images"
-        print(f"Viewer contains {(view.current_layer_list)} layers.")
-
         start_time=datetime.now()
         for idx, shape in enumerate(top_cell.shapes(layer1).each()):
             # if shape.is_polygon():
@@ -184,10 +177,6 @@ def search(filename):
                     unique_sites.append(site)
                     unique_sites_dict[count]={"Type Match":"Full Match","Shape 1 type:":c,"Shape 1 bounds:":a,"Shape 2 type":d,"Shape 2 bounds:":b, "Area of Intersection:":effective_area, 'Similar Sites':0}
                     count+=1
-                    view.pan_center(pya.Point(x,y))
-                    image_file_path=os.path.join(folderpath,f'snapshop{count}.png')
-                    view.zoom=1.0
-                    view.save_image(image_file_path,1000,1000)
                     
             else:
                 site=["OM",effective_area,c,d,x_left,x_right,y_bot,y_top]#intersecting_site[i][0],intersecting_site[i][1]] need to get the shape of these to ensure they are not the same
@@ -206,10 +195,6 @@ def search(filename):
                     unique_sites.append(site)
                     unique_sites_dict[count]={"Type Match:":"Offset Match","Shape 1 type:":c,"Shape 1 bounds:":a,"Shape 2 type":d,"Shape 2 bounds:":b, "Area of Intersection:":effective_area, 'Similar Sites':0}
                     count+=1
-                    view.pan_center(pya.Point(x,y))
-                    image_file_path=os.path.join(folderpath,f'snapshop{count}.png')
-                    view.zoom=1.0
-                    view.save_image(image_file_path,1000,1000)
         end_time=datetime.now()
 
         # print(unique_sites)
@@ -229,4 +214,4 @@ def search(filename):
         return ({"error": "File must be a GDS (.gds) to run site classification"}), 400
 
 #Comment this out when using for application
-search(filename)
+#search(filename)

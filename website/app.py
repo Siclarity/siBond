@@ -5,6 +5,7 @@ from scripts.thumbnails import gds_to_image_klayout
 import shutil
 import pya
 from scripts.bondSearch_Flask import search
+from scripts.unique_site import unique_pictures
 
 # from mesh_Flask_gen import *
 app = Flask(__name__)
@@ -123,6 +124,11 @@ def search_sites():
         if filename.endswith('.gds'):
             gds_filename=f"uploads/{filename}"
             c=search(gds_filename)
+            print(f'C:{c}')
+            print(type(c))
+            print("Entering Unique_site")
+            system(f"C:\\Users\\aneal\\AppData\\Roaming\\KLayout\\klayout_app.exe -z -r {cwd}/scripts/unique_site.py  -rd gds_folder={cwd}\\uploads diction={c}")
+            print("Exiting Unique_Site")
     return jsonify({"Result":c})
 
 @app.route('/meshGenerator')
