@@ -6,6 +6,7 @@ import logging
 import json
 import os
 import klayout.db as pya
+from klayout import lay
 from rtree import index
 from datetime import datetime
 def classification(a):
@@ -22,20 +23,29 @@ def classification(a):
 
     return a
 
-# filename="..\\uploads\\CLIP.gds"
+#filename="CLIP.gds"
 filename="Test.gds"
+#filename="displacement.gds"
 def search(filename):
     if(filename.lower().endswith('.gds')):
         rtree = index.Index()
         ly = pya.Layout()
         ly.read(filename)
-
+        print(f"Layout contains {(ly.layers())} layers.")
+        #print(f"Viewer contains {(view.current_layer_list)} layers.")
         top_cell = ly.top_cell()
         top_cell.flatten(-1,True)
         layer1 = ly.layer(110, 0)
         layer2 = ly.layer(11, 0)
         layer3 = ly.layer(4,0) #intersection layer will be added
         shapes1 = []
+
+                
+        view=lay.LayoutView()
+        view.layout = ly
+        folderpath="images"
+        print(f"Viewer contains {(view.current_layer_list)} layers.")
+
         start_time=datetime.now()
         for idx, shape in enumerate(top_cell.shapes(layer1).each()):
             # if shape.is_polygon():
@@ -95,8 +105,20 @@ def search(filename):
         print(f'offset_match : {offset_match }')
         print(f'shape1_unmatched : {shape1_left }')
         print(f'shape2_unmatched : {shape2_left }')
-        for items in intersecting_site:
-            print(items)
+
+        # for items in intersecting_site:
+        #     print(items)
+        #Create a map of the intersecting sites
+        intersection_map={}
+        for pair in intersecting_site:
+            a=str(pair[0])
+            b=str(pair[1])
+            if b in intersection_map:
+                intersection_map[b].append(a)
+            else:
+                intersection_map[b]=[a]
+        for key, value in intersection_map.items():
+            print(f"{key}: {', '.join(value)}")
         start_time=datetime.now()
         total_fullmatch=0
         total_offsetmatch=0
@@ -108,6 +130,8 @@ def search(filename):
             #print(f"Intersecting site:{i}")
             a=intersecting_site[i][0].bbox()
             b=intersecting_site[i][1].bbox()
+            #print(f"A Bounds:{a}")
+            #print(f"B Bounds:{b}")
             min_left=min(a.left,b.left)
             #print(f"Min Left:{min_left}")
             max_left=max(a.left,b.left)
@@ -126,33 +150,66 @@ def search(filename):
             #print(f"Max Top:{max_top}")
             c=classification(intersecting_site[i][0])
             d=classification(intersecting_site[i][1])
-            #effective_area=abs(abs((min_left-max_right)*(m_bot-max_top))-abs((abs(a.right-b.right)-abs(a.left-b.left))*(abs(a.top-b.top)-abs(a.bottom-b.bottom))))
+            width=(min_right-max_left)
+            height=(min_top-max_bot)
+            effective_area=abs(width*height)
+            #effective_area=abs(abs((min_left-max_right)*(min_bot-max_top))-abs((abs(a.right-b.right)-abs(a.left-b.left))*(abs(a.top-b.top)-abs(a.bottom-b.bottom))))
+            #print(f"(({min_left}-{max_right})*({min_bot}-{max_top}))-((({a.right}-{b.right})-({a.left}-{b.left}))*(({a.top}-{b.top})-({a.bottom}-{b.bottom})))")
             #effective_area=abs((abs((abs(a.right)-abs(b.right)))-abs((abs(a.left)-abs(b.left))))*abs((abs((abs(a.top)-abs(b.top)))-abs((abs(a.bottom)-abs(b.bottom))))))
-            effective_area=abs((abs(max_left)-abs(min_right))*(abs(max_bot)-abs(min_top)))
+            #effective_area=abs((abs(max_left)-abs(min_right))*(abs(max_bot)-abs(min_top)))
             #if((min_left==a.left and min_bot==a.bottom and max_right==a.right and max_top==a.top) or (min_left==b.left and min_bot==b.bottom and max_right==b.right and max_top==b.top)):
-            print(f"{effective_area}, {i}")
+            # print(f"{effective_area}, {i}")
+            #These variables below are introduced for positioning of the objects and will help with the uniqueness
+            x_left=a.left-b.left
+            x_right=a.right-b.right
+            y_bot=a.bottom-b.bottom
+            y_top=a.top-b.top
+            x=(x_left+x_right)/2
+            y=(y_bot+y_top)/2
             if(a==b):
-                site=["FM",effective_area,c,d]#intersecting_site[i][0],intersecting_site[i][1]]
-                alt_site=["FM",effective_area,d,c]
+                site=["FM",effective_area,c,d,x_left,x_right,y_bot,y_top]#intersecting_site[i][0],intersecting_site[i][1]]
+                alt_site=["FM",effective_area,d,c,x_left,x_right,y_bot,y_top]
                 classify_sites.append([site,a,b])
                 total_fullmatch+=1
                 if site in unique_sites or alt_site in unique_sites:
-                    continue
+                    place=0
+                    for items in unique_sites:
+                        if site==items:
+                            break
+                        else:
+                            place+=1
+                    unique_sites_dict[place]['Similar Sites']+=1
+
                 else:
                     unique_sites.append(site)
-                    unique_sites_dict[count]={"Type Match":"Full Match","Shape 1 type:":c,"Shape 1 bounds:":a,"Shape 2 type":d,"Shape 2 bounds:":b, "Area of Intersection:":effective_area}
+                    unique_sites_dict[count]={"Type Match":"Full Match","Shape 1 type:":c,"Shape 1 bounds:":a,"Shape 2 type":d,"Shape 2 bounds:":b, "Area of Intersection:":effective_area, 'Similar Sites':0}
                     count+=1
+                    view.pan_center(pya.Point(x,y))
+                    image_file_path=os.path.join(folderpath,f'snapshop{count}.png')
+                    view.zoom=1.0
+                    view.save_image(image_file_path,1000,1000)
+                    
             else:
-                site=["OM",effective_area,c,d]#intersecting_site[i][0],intersecting_site[i][1]] need to get the shape of these to ensure they are not the same
-                alt_site=["OM",effective_area,d,c]
+                site=["OM",effective_area,c,d,x_left,x_right,y_bot,y_top]#intersecting_site[i][0],intersecting_site[i][1]] need to get the shape of these to ensure they are not the same
+                alt_site=["OM",effective_area,d,c,x_left,x_right,y_bot,y_top]
                 classify_sites.append([site,a,b])
                 total_offsetmatch+=1
                 if site in unique_sites or alt_site in unique_sites:
-                    continue
+                    place=0
+                    for items in unique_sites:
+                        if site==items:
+                            break
+                        else:
+                            place+=1
+                    unique_sites_dict[place]['Similar Sites']+=1
                 else:
                     unique_sites.append(site)
-                    unique_sites_dict[count]={"Type Match:":"Offset Match","Shape 1 type:":c,"Shape 1 bounds:":a,"Shape 2 type":d,"Shape 2 bounds:":b, "Area of Intersection:":effective_area}
+                    unique_sites_dict[count]={"Type Match:":"Offset Match","Shape 1 type:":c,"Shape 1 bounds:":a,"Shape 2 type":d,"Shape 2 bounds:":b, "Area of Intersection:":effective_area, 'Similar Sites':0}
                     count+=1
+                    view.pan_center(pya.Point(x,y))
+                    image_file_path=os.path.join(folderpath,f'snapshop{count}.png')
+                    view.zoom=1.0
+                    view.save_image(image_file_path,1000,1000)
         end_time=datetime.now()
 
         # print(unique_sites)
@@ -165,8 +222,11 @@ def search(filename):
         #print(unique_sites_dict[2])
         for key ,value in unique_sites_dict.items():
             print(f"{key}:{value}")
-        return({"success":"Completed the Bond Search Algorithm","Full Matched":total_fullmatch,"Offset Matched":total_offsetmatch, "Total Number of Unique Sites":len(unique_sites), "List of unique bonding site":unique_sites})
+        str_dict = {key: str(value) for key, value in unique_sites_dict.items()}
+        return({"success":"Completed the Bond Search Algorithm","Full_Matched":total_fullmatch,"Offset_Matched":total_offsetmatch, "Total_Number_of_Unique_Sites":len(unique_sites), "List_of_unique_bonding_site":str_dict})
     else:
         print(filename)
         return ({"error": "File must be a GDS (.gds) to run site classification"}), 400
+
+#Comment this out when using for application
 search(filename)

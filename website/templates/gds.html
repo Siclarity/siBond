@@ -109,7 +109,16 @@
             width: 600px;
             height: 600px;
             }
-            
+            .unique_site,.offsetMatch,.fullMatch{
+                font-family: Inter;
+                font-size: 24px;
+                font-style: normal;
+                font-weight: 300;
+                line-height: normal;
+                padding: 10px;
+                margin:10px;
+            }
+
         </style>
         <script>
             // Function to handle form submission
@@ -230,7 +239,11 @@
                 </div>
                 <button id="bondSearch" onclick="IdentifyUniqueBondingSites()"> Identify Unique Bonding Sites</button>
             </div>
+            <div id="Information">
+                <h4> Information about the GDS File:</h4>
+            </div>
         </div>
+
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
           
         <script>
@@ -243,9 +256,37 @@
                         if (!response.ok) {
                             throw new Error('Network response was not ok');
                         }
+                        
                     return response.json();  // Parse the response body as JSON
                     })
-            }
+                .then(data => {
+                        // Handle the response data
+                        //alert("Success: " + JSON.stringify(data));
+                        console.log(data.Result)
+                        let unique_site=document.querySelector(".unique_site");
+                        if(!unique_site){
+                            unique_site= document.createElement("DIV");
+                            unique_site.setAttribute("class", "unique_site");
+                        }
+                        unique_site.textContent=`Unique Sites: ${data.Result.Total_Number_of_Unique_Sites}`;
+                        document.getElementById("Information").appendChild(unique_site);
+
+                        let OM=document.querySelector(".offsetMatch");
+                        if(!OM){
+                            OM = document.createElement("DIV");
+                            OM.setAttribute("class", "offsetMatch");
+                        }
+                        OM.textContent=`Offset Match: ${data.Result.Offset_Matched}`;
+                        document.getElementById("Information").appendChild(OM);
+                        let FM=document.querySelector(".fullMatch");
+                        if(!FM){
+                            FM = document.createElement("DIV");
+                            FM.setAttribute("class", "fullMatch");
+                        }
+                        FM.textContent=`Full Match: ${data.Result.Full_Matched}`;
+                        document.getElementById("Information").appendChild(FM);
+                    })
+                }
         </script>
 
         <script>

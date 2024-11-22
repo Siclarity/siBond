@@ -19,7 +19,7 @@ def clear_folder(folder_path):
         # Iterate over all the files and subdirectories in the folder
         for filename in listdir(folder_path):
             file_path = path.join(folder_path, filename)
-            if filename=="sample.png":
+            if filename=='sample.png':
                 continue
             # Check if it's a file or directory
             if path.isfile(file_path):
@@ -30,8 +30,7 @@ def clear_folder(folder_path):
     else:
         print(f"Folder {folder_path} does not exist.")
 cwd=getcwd()
-# Example usage:
-folder = f'{cwd}\\uploads'
+
 
 @app.route("/")
 def home():
@@ -92,6 +91,8 @@ def getFile():
         #if there is a file
         filename=file.filename
         if filename:
+            # Example usage:
+            folder = f'{cwd}\\uploads'
             clear_folder(folder)
             #set the filename variable equal to the name of the file
             #ilename = file
@@ -104,7 +105,7 @@ def getFile():
                 print("Successfully uploaded:",filename)
                 #cwd = getcwd()
                 system(f"C:\\Users\\aneal\\AppData\\Roaming\\KLayout\\klayout_app.exe -z -r {cwd}/scripts/thumbnails.py  -rd gds_folder={cwd}\\uploads")
-                return jsonify({"success": "File uploaded successfully","filename":filename, "Image status:":"Please Refresh your browser to see the image of the GDS file"})
+                return jsonify({"success": "File uploaded successfully","filename":filename, "Image status:":"Loading..."})
 
             except Exception as e:
                 print("Error while saving file:", e)
