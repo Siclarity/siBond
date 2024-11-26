@@ -6,7 +6,8 @@ import shutil
 import pya
 from scripts.bondSearch_Flask import search
 from scripts.unique_site import unique_pictures
-
+from json import dumps
+import subprocess
 # from mesh_Flask_gen import *
 app = Flask(__name__)
 
@@ -95,6 +96,8 @@ def getFile():
             # Example usage:
             folder = f'{cwd}\\uploads'
             clear_folder(folder)
+            images=f'{cwd}\\scripts\\images'
+            clear_folder(images)
             #set the filename variable equal to the name of the file
             #ilename = file
             filepath = path.join(app.config['Uploaded_GDS'], filename)
@@ -124,11 +127,22 @@ def search_sites():
         if filename.endswith('.gds'):
             gds_filename=f"uploads/{filename}"
             c=search(gds_filename)
-            print(f'C:{c}')
-            print(type(c))
+            #print(f'C:{c}')
+            #print(type(c))
+            diction_serialized=dumps(c)
+            diction_serialized = diction_serialized.replace('"', '\\"') 
+            print(type(diction_serialized))
+            images=f'{cwd}\\scripts\\images'
+            clear_folder(images)
             print("Entering Unique_site")
-            system(f"C:\\Users\\aneal\\AppData\\Roaming\\KLayout\\klayout_app.exe -z -r {cwd}/scripts/unique_site.py  -rd gds_folder={cwd}\\uploads diction={c}")
-            print("Exiting Unique_Site")
+            #print(f"Arguments passed:\n gds_folder={cwd}\\uploads \n diction={diction_serialized}")
+            cm=f'C:\\Users\\aneal\\AppData\\Roaming\\KLayout\\klayout_app.exe -z -r {cwd}/scripts/unique_site.py  -rd gds_folder={cwd}\\uploads  -rd diction="{diction_serialized}"'
+            #print(f"CM:{cm}")
+            # test=system(cm)
+            result=subprocess.run(cm,shell=True,capture_output=True,text=True)
+            print(f"Output: {result.stdout}")
+            print(f"Error: {result.stderr}")
+            print(f"Exiting Unique_Site:{result.returncode}")
     return jsonify({"Result":c})
 
 @app.route('/meshGenerator')
