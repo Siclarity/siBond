@@ -6,7 +6,7 @@ import shutil
 import pya
 from scripts.bondSearch_Flask import search
 from scripts.unique_site import unique_pictures
-from json import dumps
+from json import dumps, dump
 import subprocess
 # from mesh_Flask_gen import *
 app = Flask(__name__)
@@ -32,7 +32,8 @@ def clear_folder(folder_path):
     else:
         print(f"Folder {folder_path} does not exist.")
 cwd=getcwd()
-
+IMAGE_FOLDER=f'{cwd}/scripts/images'
+app.config["IMAGE_FOLDER"]=IMAGE_FOLDER
 
 @app.route("/")
 def home():
@@ -128,15 +129,18 @@ def search_sites():
             gds_filename=f"uploads/{filename}"
             c=search(gds_filename)
             #print(f'C:{c}')
-            #print(type(c))
-            diction_serialized=dumps(c)
-            diction_serialized = diction_serialized.replace('"', '\\"') 
-            print(type(diction_serialized))
+            print(type(c))
+            # diction_serialized=dumps(c)
+            # diction_serialized = diction_serialized.replace('"', '\\"') 
+            with open("information.json","w") as outfile:
+                dump(c,outfile)
+            #print(type(diction_serialized))
             images=f'{cwd}\\scripts\\images'
             clear_folder(images)
             print("Entering Unique_site")
             #print(f"Arguments passed:\n gds_folder={cwd}\\uploads \n diction={diction_serialized}")
-            cm=f'C:\\Users\\aneal\\AppData\\Roaming\\KLayout\\klayout_app.exe -z -r {cwd}/scripts/unique_site.py  -rd gds_folder={cwd}\\uploads  -rd diction="{diction_serialized}"'
+
+            cm=f'C:\\Users\\aneal\\AppData\\Roaming\\KLayout\\klayout_app.exe -z -r {cwd}/scripts/unique_site.py  -rd gds_folder={cwd}\\uploads  -rd diction={cwd}\\information.json"'
             #print(f"CM:{cm}")
             # test=system(cm)
             result=subprocess.run(cm,shell=True,capture_output=True,text=True)
@@ -144,6 +148,19 @@ def search_sites():
             print(f"Error: {result.stderr}")
             print(f"Exiting Unique_Site:{result.returncode}")
     return jsonify({"Result":c})
+
+
+@app.route('/scripts/images/<filename>')
+def unique_images(filename):
+    print(f"Gallery:{filename}")
+    return send_from_directory(IMAGE_FOLDER, filename)
+@app.route('/gallery')
+def gallery():
+    # Get all image filenames in the directory
+    images = [f for f in listdir(IMAGE_FOLDER) if f.lower().endswith(('.png'))]
+    if not images:
+        return jsonify([])
+    return jsonify(images)
 
 @app.route('/meshGenerator')
 def meshGenerator():

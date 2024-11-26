@@ -40,6 +40,7 @@
                 background-color: white;
                 width:90vw;
                 height:90vh;
+                display: flex;
             }
             .left-side-box{
                 display:flex;
@@ -118,7 +119,16 @@
                 padding: 10px;
                 margin:10px;
             }
-
+            .gallery {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            .gallery img {
+                width: 200px;
+                height: auto;
+                border: 1px solid #ddd;
+            }
         </style>
         <script>
             // Function to handle form submission
@@ -236,8 +246,12 @@
                     {% else %}
                         <p>No PNG file found.</p>
                     {% endif %}
-                </div>
                 <button id="bondSearch" onclick="IdentifyUniqueBondingSites()"> Identify Unique Bonding Sites</button>
+                </div>
+                <div class="gallery_container">
+                    <h1>Unique Bonding Sites Image Gallery</h1>
+                    <div id="gallery" class="gallery"></div> <!-- Images will appear here -->
+                </div>
             </div>
             <div id="Information">
                 <h4> Information about the GDS File:</h4>
@@ -412,6 +426,49 @@
             }
         setInterval(refreshImage, 5000);
         
+        </script>
+
+        <script>
+            function updateGallery() {
+                fetch('/gallery')
+                    .then(response => response.json())
+                    .then(images => {
+                        const gallery = document.getElementById('gallery');
+                        const existingImages = gallery.querySelectorAll('img');
+                        if (images.length === 0) {
+                            // Clear all images in the gallery
+                            existingImages.forEach(img => img.remove());
+                            console.log("Gallery is empty. Removed all images.");
+                            return;
+                        }
+
+                        // Loop through all the images fetched from the server
+                        images.forEach(image => {
+                            // Check if the image already exists in the gallery
+                            const imageSrc = `/scripts/images/${image}`;
+                            const imageExists = Array.from(existingImages).some(img => img.alt === image);
+
+                            // If the image doesn't exist, add it
+                            if (!imageExists) {
+                                const imgElement = document.createElement('img');
+                                imgElement.src = imageSrc;
+                                imgElement.alt = image;
+
+                                // Append the image to the gallery
+                                gallery.appendChild(imgElement);
+                                console.log(`Added new image: ${image}`);
+                            } else {
+                                // If the image exists, you may want to update the src for cache busting (if content has changed)
+                                const updatedSrc = `${imageSrc}?v=${new Date().getTime()}`;
+                                const existingImage = Array.from(existingImages).find(img => img.alt === image);
+                                existingImage.src = updatedSrc;  // Update image with cache-busting query
+                                console.log(`Updated image: ${image}`);
+                            }
+                        });
+                    })
+                    .catch(error => console.error('Error loading gallery:', error));
+            }
+        setInterval(updateGallery, 6000);
         </script>
     </body>
 </html>
