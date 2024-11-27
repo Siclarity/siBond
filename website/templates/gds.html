@@ -219,6 +219,16 @@
                     <button id="apply-lens-size">Apply</button>
                 </div>
                 <div class="spacer"></div>
+                <div class="layer-clicker-container">
+                    <h1>Layer Control</h1>
+                    <div id="layerContainer" class="layerContainer">
+                        <h3>Select Layers to Display:</h3>
+                        <div id="layers"></div>
+                    </div>
+                    <button id="load-layers-btn">Load Layers</button>
+                    <button id="update-thumbnail-btn">Update Thumbnail</button>
+                </div>
+                <div class="spacer"></div>
                 <form class="M">
                     <h4>M1</h4>
                     <input type="number" class="offset" id="offsetM1" placeholder="Offset" name="Offset_M1">
@@ -491,6 +501,70 @@
                     .catch(error => console.error('Error loading gallery:', error));
             }
         setInterval(updateGallery, 6000);
+        </script>
+        <script>
+        let availableLayers = [];
+        document.getElementById('load-layers-btn').addEventListener('click', function() {
+            fetch('/get_layers')
+                .then(response => response.json())
+                .then(layers => {
+                    console.log('Layers:', layers);
+                    // Use the data to create checkboxes dynamically
+                    populateLayerCheckboxes(layers);
+                })
+                .catch(error => {
+                    console.error('Error fetching layers:', error);
+                    alert('There was an error loading the layers.');
+            });
+        });
+
+        function populateLayerCheckboxes(layers) {
+            const layerContainer = document.getElementById('layerContainer'); // Make sure you have this element in your HTML
+            layerContainer.innerHTML ='';  // Clear existing checkboxes before adding new ones
+
+            layers.forEach(layer => {
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = `layer-${layer.layer}-${layer.datatype}`;
+                checkbox.value = `${layer.layer}-${layer.datatype}`;
+                const label = document.createElement('label');
+                label.setAttribute('for', checkbox.id);
+                label.innerText = layer.name;
+
+                const div = document.createElement('div');
+                div.appendChild(checkbox);
+                div.appendChild(label);
+                layerContainer.appendChild(div);
+            });
+        }
+        // Function to collect selected layers and update the thumbnail
+        document.getElementById('update-thumbnail-btn').addEventListener('click', function() {
+            const selectedLayers = [];
+            // Collect the selected layers
+            document.querySelectorAll('input[type="checkbox"]:checked').forEach((checkbox) => {
+                const [layer, datatype] = checkbox.value.split('-');
+                selectedLayers.push({ layer: parseInt(layer), datatype: parseInt(datatype) });
+            });
+
+            // Send the selected layers to the server to update the thumbnail
+            fetch('/update_thumbnail', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ layers: selectedLayers })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Thumbnail updated:', data);
+                if (data.status === 'error') {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
         </script>
     </body>
 </html>

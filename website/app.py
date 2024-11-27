@@ -2,11 +2,14 @@ from flask import Flask,render_template,request,jsonify,send_from_directory
 from os import listdir, system, makedirs, getcwd, path, remove
 from os.path import isfile, join, isdir, exists
 from scripts.thumbnails import gds_to_image_klayout
+from scripts.get_layers import retrieve_layers
 import shutil
 import pya
 from scripts.bondSearch_Flask import search
 from scripts.unique_site import unique_pictures
+from scripts.layer_modifier import mod_layers
 from json import dumps, dump
+import json
 import subprocess
 # from mesh_Flask_gen import *
 app = Flask(__name__)
@@ -161,6 +164,79 @@ def gallery():
     if not images:
         return jsonify([])
     return jsonify(images)
+
+# Endpoint to get the available layers from the GDS file
+@app.route('/get_layers', methods=['GET'])
+def get_layers():
+    try:
+        # Get all GDS files in the specified directory
+        gds_files = [f for f in listdir(Uploaded_GDS) if f.endswith('.gds')]
+        if not gds_files:
+            return jsonify({'status': 'error', 'message': 'No GDS files found in the directory'}), 400
+
+
+        # Build the command to execute the KLayout script
+        cm = f'C:\\Users\\aneal\\AppData\\Roaming\\KLayout\\klayout_app.exe -z -r {cwd}/scripts/get_layers.py -rd gds_files_path={cwd}\\uploads'
+
+        # Run the command and capture the output
+        result = subprocess.run(cm, shell=True, capture_output=True, text=True)
+        # Log the result
+        print(f"Output: {result.stdout}")
+        print(f"Error: {result.stderr}")
+        print(f"Return Code: {result.returncode}")
+        # Check if the command was successful
+        if result.returncode != 0:
+            return jsonify({'status': 'error', 'message': 'Error running KLayout script', 'details': result.stderr}), 500
+
+        # Assuming that the KLayout script returns the layers in a suitable format (e.g., JSON)
+        print(f"Layers outside the python file:{result.stdout}")
+        layers = result.stdout.strip()
+        print(f"Strip the layers outside the python file:{layers}")
+        # Here, you should process the 'layers' string if needed.
+        # For now, we assume it is already a JSON string (adjust this as needed).
+        try:
+            layers_data = json.loads(layers)  # Convert the output to a Python object (list or dict)
+        except json.JSONDecodeError as e:
+            return jsonify({'status': 'error', 'message': f'Error parsing layers: {str(e)}'}), 500
+
+        return jsonify(layers_data)
+
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+# Endpoint to update the thumbnail based on selected layers
+@app.route('/update_thumbnail', methods=['POST'])
+def update_thumbnail():
+    try:
+        selected_layers = request.json.get('layers', [])
+        
+        if not selected_layers:
+            return jsonify({'status': 'error', 'message': 'No layers selected'}), 400
+
+        print("Selected layers:", selected_layers)
+
+        # Convert selected layers into a list of tuples (layer, datatype)
+        visible_layer = [(int(layer['layer']), int(layer['datatype'])) for layer in selected_layers]
+        print(f"Formatted visible layers: {visible_layer}")
+        visible_layer_str = str(visible_layer)
+        cm = f'C:\\Users\\aneal\\AppData\\Roaming\\KLayout\\klayout_app.exe -z -r {cwd}/scripts/layer_modifier.py -rd gds_folder={cwd}\\uploads -rd layer="{visible_layer_str}"'
+
+        # Run the KLayout command
+        result = subprocess.run(cm, shell=True, capture_output=True)
+
+        # Log the result
+        print(f"Output: {result.stdout}")
+        print(f"Error: {result.stderr}")
+        print(f"Return Code: {result.returncode}")
+
+        if result.returncode != 0:
+            return jsonify({'status': 'error', 'message': 'Error running KLayout script', 'details': result.stderr.decode()}), 500
+
+        return jsonify({'status': 'success', 'message': 'Thumbnail updated successfully'})
+
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 @app.route('/meshGenerator')
 def meshGenerator():
