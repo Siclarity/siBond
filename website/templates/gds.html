@@ -184,6 +184,7 @@
                 .then(data => {
                     // Handle the response data
                     alert("Success: " + JSON.stringify(data));
+                    refreshImage();
                 })
                 .catch(error => {
                     // Handle any errors
@@ -227,6 +228,7 @@
                     </div>
                     <button id="load-layers-btn">Load Layers</button>
                     <button id="update-thumbnail-btn">Update Thumbnail</button>
+                    <button id="refresh-Image" onclick="refreshImage()"> Refresh Image</button>
                 </div>
                 <div class="spacer"></div>
                 <form class="M">
@@ -426,6 +428,7 @@
 
         </script>
         <script>
+            imageZoom("uploaded_image","zresult");
             function refreshImage() {
                 const imgElement = document.getElementById("uploaded_image");
                 const resultElement=document.getElementById("zresult");
@@ -446,17 +449,18 @@
             
                     if (imageFilename) {
                     // Update the image src with the new filename
-                        const imageUrl = `/uploads/${imageFilename}`;
-                        imgElement.src = imageUrl;
-                        imageZoom("uploaded_image", "zresult");
+                        const imageUrl = `/uploads/${imageFilename}?t=${new Date().getTime()}`;
+                        imgElement.src = imageUrl; 
+                        imageZoom("uploaded_image", "zresult"); 
                     } 
                     else {
                         console.log('No image filename provided');
                     }
+                    
                 })
                 .catch(error => console.error('Error refreshing the image:', error));
             }
-        setInterval(refreshImage, 5000);
+        //setInterval(refreshImage, 10000);
         
         </script>
 
@@ -560,10 +564,12 @@
                 if (data.status === 'error') {
                     alert('Error: ' + data.message);
                 }
+                refreshImage();
             })
             .catch(error => {
                 console.error('Error:', error);
             });
+            
         });
         </script>
     </body>
