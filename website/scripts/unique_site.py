@@ -1,6 +1,6 @@
 import pya
-from os import listdir
-from os.path import join, isfile,splitext,basename
+from os import listdir,getcwd,remove
+from os.path import join, isfile,splitext,exists
 from json import loads,dumps,load
 import ast
 import klayout.db as db
@@ -42,9 +42,9 @@ def unique_pictures(gds_files_path, diction, layer_properties, width=1000, heigh
     #print(type(values))
     marked_layout=pya.Layout()
     marked_layout.read(files)
-    top_cell=marked_layout.cell("TOP")
-    if top_cell is None:
-        top_cell=marked_layout.create_cell("TOP")
+    # top_cell=marked_layout.cell("TOP")
+    # if top_cell is None:
+    #     top_cell=marked_layout.create_cell("TOP")
     layer_index= marked_layout.layer(pya.LayerInfo(1,0))
     unique_diction=values['List_of_unique_bonding_site']
     #print(f"Unique Diction:{unique_diction}")
@@ -108,14 +108,28 @@ def unique_pictures(gds_files_path, diction, layer_properties, width=1000, heigh
         mark_y=(marker_b+marker_d)/2
         marker=pya.DBox(mark_x,mark_y,mark_x+(tol*Units),mark_y+(tol*Units))
         print(f'Marker added:{marker}')
-        top_cell.shapes(layer_index).insert(marker)
+        marked_layout.top_cell().shapes(layer_index).insert(marker)
         lv.zoom_box(zoom_position)
         lv.save_image_with_options(f"unique_site{count}.png",1000,1000)
         move(f"C:\\Users\\aneal\\SiClarity\\SiBond-github\\siBond\\website\\unique_site{count}.png","C:\\Users\\aneal\\SiClarity\\SiBond-github\\siBond\\website\\scripts\\images")
         count+=1
     
-    new_filename=f"Markup_layout.gds"
+    new_filename=files.split('\\')[-1]
+    print(f"Filename:{new_filename}")
     marked_layout.write(new_filename)
+    cwd=getcwd()
+    directory_upload=join(cwd,'uploads')
+    print(f"Direct:{directory_upload}")
+    directory_upload=join(directory_upload,new_filename)
+    print(f"Dest:{directory_upload}")
+    if exists(directory_upload):
+        remove(directory_upload)
+        print("File Deleted")
+    # Move the image to the uploads directory
+    move(new_filename, directory_upload)
+
+    print(f"File moved to: {directory_upload}")
+ 
     print("Exiting Unique Site")
     lv.close()
 
