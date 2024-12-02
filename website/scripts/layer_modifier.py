@@ -26,9 +26,15 @@ def mod_layers(gds_files_path, layer, layer_properties, width=1000, height=1000)
     #print(l)
     cwd=getcwd()
     # print(cwd)
-    filename=[join(gds_files_path, name) for name in listdir(gds_files_path) if isfile(join(gds_files_path, name)) and name.endswith('.png')][0]
-    #print(f"filename:{filename}")
-    filename=filename.split('\\')[-1]
+    filename=[join(gds_files_path, name) for name in listdir(gds_files_path) if isfile(join(gds_files_path, name)) and name.endswith('.png')]
+    for files in filename:
+        if files=='sample.png':
+            continue
+        else:
+            filename=files.split('\\')[-1]
+    print(f"filename:{filename}")
+    #filename=files.split('\\')[-1]
+    #print(f'Filename:{filename}')
     #print(f"Last File name:{filename}")
     #lv.save_image(f"{filename}1.png",width,height)
     #This should overwrite the file.png that exists in the uploads folder
