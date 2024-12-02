@@ -57,29 +57,49 @@ def unique_pictures(gds_files_path, diction, layer_properties, width=1000, heigh
         object_bound2=unique_diction[item]["Shape 2 bounds:"]
         a1,a2,a3,a4=object_bound1
         b1,b2,b3,b4=object_bound2
+        # print(f"Object1 bounds:{object_bound1}, Object2 bounds:{object_bound2}")
         x1=min(a1,b1)
         y1=min(a2,b2)
         x2=max(a3,b3)
         y2=max(a4,b4)
+        # print(f'X1:{x1}')
+        # print(f'Y1:{y1}')
+        # print(f'X2:{x2}')
+        # print(f'Y2:{y2}')
         tol=2
         x1-=tol
         y1-=tol
         x2+=tol
         y2+=tol
+        # print("Tolerance Application:")
+        # print(f'X1:{x1}')
+        # print(f'Y1:{y1}')
+        # print(f'X2:{x2}')
+        # print(f'Y2:{y2}')
         scale_factor=0.5
+        # print(f'Scale Factor:{scale_factor}')
         box_width = (x2 - x1) * scale_factor
         box_height = (y2 - y1) * scale_factor
+        # print(f'Box Width:{box_width}, Box Height:{box_height}')
         zoom_pos = pya.DBox(x1 - box_width / 2, y1 - box_height / 2, x2 + box_width / 2, y2 + box_height / 2)
-        zoom_pos.top*=Units
-        zoom_pos.right*=Units
-        zoom_pos.left*=Units
-        zoom_pos.bottom*=Units
-        print("Zooming into box:", zoom_pos)
-        lv.zoom_box(zoom_pos)
+        # print(f'Zoom Pos:{zoom_pos}')
+        a=zoom_pos.top*Units
+        b=zoom_pos.right*Units
+        c=zoom_pos.left*Units
+        d=zoom_pos.bottom*Units
+        # print("Database Units Application:")
+        # print(f'X1:{c}')
+        # print(f'Y1:{d}')
+        # print(f'X2:{b}')
+        # print(f'Y2:{a}')
+        zoom_position=pya.DBox(c,d,b,a)
+        print("Zooming into box:", zoom_position)
+        lv.zoom_box(zoom_position)
         lv.save_image_with_options(f"unique_site{count}.png",1000,1000)
         move(f"C:\\Users\\aneal\\SiClarity\\SiBond-github\\siBond\\website\\unique_site{count}.png","C:\\Users\\aneal\\SiClarity\\SiBond-github\\siBond\\website\\scripts\\images")
         count+=1
     print("Exiting Unique Site")
+    lv.close()
 
 if __name__ == '__main__':
     #global gds_folder,diction,layer_properties
