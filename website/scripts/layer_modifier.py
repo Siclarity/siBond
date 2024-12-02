@@ -27,11 +27,14 @@ def mod_layers(gds_files_path, layer, layer_properties, width=1000, height=1000)
     cwd=getcwd()
     # print(cwd)
     filename=[join(gds_files_path, name) for name in listdir(gds_files_path) if isfile(join(gds_files_path, name)) and name.endswith('.png')]
+    #print(f'File names:{filename}')
     for files in filename:
+        files=files.split('\\')[-1]
+        #print(f'Files:{files}')
         if files=='sample.png':
             continue
         else:
-            filename=files.split('\\')[-1]
+            filename=files
     print(f"filename:{filename}")
     #filename=files.split('\\')[-1]
     #print(f'Filename:{filename}')
