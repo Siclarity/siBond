@@ -1,6 +1,6 @@
 import pya
 from os import listdir
-from os.path import join, isfile
+from os.path import join, isfile,splitext,basename
 from json import loads,dumps,load
 import ast
 import klayout.db as db
@@ -40,6 +40,12 @@ def unique_pictures(gds_files_path, diction, layer_properties, width=1000, heigh
     print(f"The DBU for the layout is:{Units}")
     #lv.save_image("Whole.png",width,height)
     #print(type(values))
+    marked_layout=pya.Layout()
+    marked_layout.read(files)
+    top_cell=marked_layout.cell("TOP")
+    if top_cell is None:
+        top_cell=marked_layout.create_cell("TOP")
+    layer_index= marked_layout.layer(pya.LayerInfo(1,0))
     unique_diction=values['List_of_unique_bonding_site']
     #print(f"Unique Diction:{unique_diction}")
     #print(unique_diction.keys())
@@ -58,10 +64,10 @@ def unique_pictures(gds_files_path, diction, layer_properties, width=1000, heigh
         a1,a2,a3,a4=object_bound1
         b1,b2,b3,b4=object_bound2
         # print(f"Object1 bounds:{object_bound1}, Object2 bounds:{object_bound2}")
-        x1=min(a1,b1)
-        y1=min(a2,b2)
-        x2=max(a3,b3)
-        y2=max(a4,b4)
+        x1=max(a1,b1)
+        y1=max(a2,b2)
+        x2=min(a3,b3)
+        y2=min(a4,b4)
         # print(f'X1:{x1}')
         # print(f'Y1:{y1}')
         # print(f'X2:{x2}')
@@ -94,10 +100,22 @@ def unique_pictures(gds_files_path, diction, layer_properties, width=1000, heigh
         # print(f'Y2:{a}')
         zoom_position=pya.DBox(c,d,b,a)
         print("Zooming into box:", zoom_position)
+        marker_a=x1*Units
+        marker_b=y1*Units
+        marker_c=x2*Units
+        marker_d=y2*Units
+        mark_x=(marker_a+marker_c)/2
+        mark_y=(marker_b+marker_d)/2
+        marker=pya.DBox(mark_x,mark_y,mark_x+(tol*Units),mark_y+(tol*Units))
+        print(f'Marker added:{marker}')
+        top_cell.shapes(layer_index).insert(marker)
         lv.zoom_box(zoom_position)
         lv.save_image_with_options(f"unique_site{count}.png",1000,1000)
         move(f"C:\\Users\\aneal\\SiClarity\\SiBond-github\\siBond\\website\\unique_site{count}.png","C:\\Users\\aneal\\SiClarity\\SiBond-github\\siBond\\website\\scripts\\images")
         count+=1
+    
+    new_filename=f"Markup_layout.gds"
+    marked_layout.write(new_filename)
     print("Exiting Unique Site")
     lv.close()
 
