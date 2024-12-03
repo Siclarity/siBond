@@ -45,7 +45,7 @@ def unique_pictures(gds_files_path, diction, layer_properties, width=1000, heigh
     # top_cell=marked_layout.cell("TOP")
     # if top_cell is None:
     #     top_cell=marked_layout.create_cell("TOP")
-    layer_index= marked_layout.layer(pya.LayerInfo(1,0))
+    layer_index= marked_layout.layer(pya.LayerInfo(1000,0))
     unique_diction=values['List_of_unique_bonding_site']
     #print(f"Unique Diction:{unique_diction}")
     #print(unique_diction.keys())
@@ -105,8 +105,17 @@ def unique_pictures(gds_files_path, diction, layer_properties, width=1000, heigh
         marker_c=x2*Units
         marker_d=y2*Units
         mark_x=(marker_a+marker_c)/2
+        print(type(mark_x))
+        print(f'Mark X:{mark_x}')
         mark_y=(marker_b+marker_d)/2
-        marker=pya.DBox(mark_x,mark_y,mark_x+(tol*Units),mark_y+(tol*Units))
+        print(f'Mark Y:{mark_y}')
+        #marker=pya.DBox(mark_x,mark_y,mark_x+(tol*Units),mark_y+(tol*Units))
+        shift=pya.DTrans(mark_x,mark_y)
+        print(type({shift}))
+        print(f'Shift:{shift}')
+        font_size = 10
+        marker=pya.DText(str(count),shift)
+        #marker=pya.DText(count)
         print(f'Marker added:{marker}')
         marked_layout.top_cell().shapes(layer_index).insert(marker)
         lv.zoom_box(zoom_position)
