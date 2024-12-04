@@ -113,9 +113,14 @@ def unique_pictures(gds_files_path, diction, layer_properties, width=1000, heigh
         shift=pya.DTrans(mark_x,mark_y)
         print(type({shift}))
         print(f'Shift:{shift}')
-        font_size = 10
+        font_size = 10 #
         marker=pya.DText(str(count),shift)
-        #marker=pya.DText(count)
+        print(f'Marker Height Size:{marker.size}')
+        marker.size=10.0 #Marker Height Size
+        print(f'New Marker Height Size:{marker.size}')
+        print(f'Marker Font Size:{marker.font}')
+        marker.font=font_size #Marker Font Size
+        print(f'New Marker font:{marker.font}')
         print(f'Marker added:{marker}')
         marked_layout.top_cell().shapes(layer_index).insert(marker)
         lv.zoom_box(zoom_position)
