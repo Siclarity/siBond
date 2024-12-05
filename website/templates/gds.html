@@ -223,9 +223,9 @@
                 <div class="spacer"></div>
                 <div class="lens_control">
                     <label for="lens-width">Lens Width:</label>
-                    <input type="number" id="lens-width" value="100" min="10" max="200">
+                    <input type="number" id="lens-width" value="100" min="10" max="400">
                     <label for="lens-height">Lens Height:</label>
-                    <input type="number" id="lens-height" value="100" min="10" max="200">
+                    <input type="number" id="lens-height" value="100" min="10" max="400">
                     <button id="apply-lens-size">Apply</button>
                 </div>
                 <div class="spacer"></div>
@@ -502,7 +502,14 @@
                         }
 
                         // Loop through all the images fetched from the server
-                        images.sort().forEach(image => {
+                        images.sort((a, b) => {
+                            // Extract the numeric part from the filenames using regular expression
+                            const numA = parseInt(a.match(/\d+/)[0]); // Extracts the number from filename a
+                            const numB = parseInt(b.match(/\d+/)[0]); // Extracts the number from filename b
+
+                            return numA - numB; // Sorts numerically
+                        });
+                        images.forEach(image => {
                             // Check if the image already exists in the gallery
                             const imageSrc = `/scripts/images/${image}`;
                             const imageExists = Array.from(existingImages).some(img => img.alt === image);

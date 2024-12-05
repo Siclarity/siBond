@@ -65,10 +65,10 @@ def unique_pictures(gds_files_path, diction, layer_properties, width=1000, heigh
         a1,a2,a3,a4=object_bound1
         b1,b2,b3,b4=object_bound2
         # print(f"Object1 bounds:{object_bound1}, Object2 bounds:{object_bound2}")
-        x1=max(a1,b1)
-        y1=max(a2,b2)
-        x2=min(a3,b3)
-        y2=min(a4,b4)
+        x1=min(a1,b1)
+        y1=min(a2,b2)
+        x2=max(a3,b3)
+        y2=max(a4,b4)
         # print(f'X1:{x1}')
         # print(f'Y1:{y1}')
         # print(f'X2:{x2}')
