@@ -126,6 +126,15 @@
                 height: auto;
                 border: 1px solid #ddd;
             }
+            #generateMesh {
+            background-color: gray;
+            color: white;
+            cursor: not-allowed;
+            }
+            #generateMesh.active {
+                background-color: green;
+                cursor: pointer;
+            }
         </style>
         <script>
             // Function to handle form submission
@@ -208,7 +217,7 @@
                     <!-- <input type="submit" value="Upload File"> -->
                     <!-- <button type="submit" onclick="getFile()">Upload File</button> -->
                     <!-- <button type="submit" class="home_button" onclick="callBackendAPI()"> Upload File</button> -->
-                    <button type="submit"> Upload File</button>
+                    <button type="submit" onclick="newFileUploaded()"> Upload File</button>
                 </form>
                 
                 <div class="spacer"></div>
@@ -264,14 +273,17 @@
                         <p>No PNG file found.</p>
                     {% endif %}
                 <button id="bondSearch" onclick="IdentifyUniqueBondingSites()"> Identify Unique Bonding Sites</button>
+                <button id="generateMesh" disabled> Unique Mesh Sites Generation </button>
                 </div>
                 <div class="gallery_container">
                     <h1>Unique Bonding Sites Image Gallery</h1>
                     <div id="gallery" class="gallery"></div> <!-- Images will appear here -->
                 </div>
             </div>
-            <div id="Information">
+            <div class="Info_Container">
                 <h4> Information about the GDS File:</h4>
+                <div id="Information">
+                </div>
             </div>
         </div>
 
@@ -280,7 +292,7 @@
         <script>
             function IdentifyUniqueBondingSites() {
                 const but_search = document.getElementById("bondSearch");
-
+                but_search.disabled=true;
                 // Get the new image source from the server
                 fetch('/search')  // Make a GET request to /h to get the updated image filename
                 .then(response => {
@@ -298,6 +310,7 @@
                         if(!unique_site){
                             unique_site= document.createElement("DIV");
                             unique_site.setAttribute("class", "unique_site");
+                            unique_site.setAttribute("id", "unique_site");
                         }
                         unique_site.textContent=`Unique Sites: ${data.Result.Total_Number_of_Unique_Sites}`;
                         document.getElementById("Information").appendChild(unique_site);
@@ -306,6 +319,7 @@
                         if(!OM){
                             OM = document.createElement("DIV");
                             OM.setAttribute("class", "offsetMatch");
+                            OM.setAttribute("id", "offsetMatch");
                         }
                         OM.textContent=`Offset Match: ${data.Result.Offset_Matched}`;
                         document.getElementById("Information").appendChild(OM);
@@ -313,9 +327,15 @@
                         if(!FM){
                             FM = document.createElement("DIV");
                             FM.setAttribute("class", "fullMatch");
+                            FM.setAttribute("id","fullMatch");
                         }
                         FM.textContent=`Full Match: ${data.Result.Full_Matched}`;
                         document.getElementById("Information").appendChild(FM);
+                        
+                        const generate_mesh=document.getElementById('generateMesh');
+                        generate_mesh.disabled=false;
+                        generate_mesh.classList.add('active');
+
                     })
                 }
         </script>
@@ -475,11 +495,14 @@
                             // Clear all images in the gallery
                             existingImages.forEach(img => img.remove());
                             console.log("Gallery is empty. Removed all images.");
+                            const generate_mesh=document.getElementById('generateMesh');
+                            generate_mesh.disabled=true;
+                            generate_mesh.classList.remove('active');
                             return;
                         }
 
                         // Loop through all the images fetched from the server
-                        images.forEach(image => {
+                        images.sort().forEach(image => {
                             // Check if the image already exists in the gallery
                             const imageSrc = `/scripts/images/${image}`;
                             const imageExists = Array.from(existingImages).some(img => img.alt === image);
@@ -501,6 +524,8 @@
                                 console.log(`Updated image: ${image}`);
                             }
                         });
+                        const but_search = document.getElementById("bondSearch");
+                        but_search.disabled=false;
                     })
                     .catch(error => console.error('Error loading gallery:', error));
             }
@@ -571,6 +596,25 @@
             });
             
         });
+        </script>
+        <script>
+            function newFileUploaded(){
+                //function just clears all outstanding objects such as previous layers and information
+                const layerContainer = document.getElementById('layerContainer');
+                layerContainer.innerHTML =''; 
+                var us=document.getElementById("unique_site");
+                if(us){
+                    us.textContent='';
+                }
+                var om=document.getElementById("offsetMatch");
+                if(om){
+                    om.textContent='';
+                }
+                var fm=document.getElementById("fullMatch");
+                if(fm){
+                    fm.textContent='';
+                }
+            }
         </script>
     </body>
 </html>

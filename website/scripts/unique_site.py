@@ -54,6 +54,7 @@ def unique_pictures(gds_files_path, diction, layer_properties, width=1000, heigh
     #print(unique_diction)
     print("Printing Unique Sites via Indexes")
     count=1
+    cwd=getcwd()
     for layerProperties in lv.each_layer():          #loop through all layer and make them visible if they are in the visible_layer array 
         layerProperties.visible = ((layerProperties.source_layer, layerProperties.source_datatype) in visible_layer)
     for layerProperties in lv.each_layer():
@@ -125,13 +126,14 @@ def unique_pictures(gds_files_path, diction, layer_properties, width=1000, heigh
         marked_layout.top_cell().shapes(layer_index).insert(marker)
         lv.zoom_box(zoom_position)
         lv.save_image_with_options(f"unique_site{count}.png",1000,1000)
-        move(f"C:\\Users\\aneal\\SiClarity\\SiBond-github\\siBond\\website\\unique_site{count}.png","C:\\Users\\aneal\\SiClarity\\SiBond-github\\siBond\\website\\scripts\\images")
+        move(f"{cwd}\\unique_site{count}.png",f"{cwd}\\scripts\\images")
         count+=1
     
     new_filename=files.split('\\')[-1]
     print(f"Filename:{new_filename}")
     marked_layout.write(new_filename)
-    cwd=getcwd()
+
+    # print(cwd)
     directory_upload=join(cwd,'uploads')
     print(f"Direct:{directory_upload}")
     directory_upload=join(directory_upload,new_filename)
