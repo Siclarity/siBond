@@ -290,6 +290,7 @@
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
           
         <script>
+            var dictionary_sites;
             function IdentifyUniqueBondingSites() {
                 const but_search = document.getElementById("bondSearch");
                 but_search.disabled=true;
@@ -305,7 +306,9 @@
                 .then(data => {
                         // Handle the response data
                         //alert("Success: " + JSON.stringify(data));
+                        dictionary_sites=data.Result.List_of_unique_bonding_site
                         console.log(data.Result)
+                        console.log(dictionary_sites)
                         let unique_site=document.querySelector(".unique_site");
                         if(!unique_site){
                             unique_site= document.createElement("DIV");
@@ -623,5 +626,55 @@
                 }
             }
         </script>
-    </body>
+        <script>
+            //This is the function that runs which will fetch the new route this only runs when only all input fields have been filled and the run bondsite has been done
+            function generateGDSMesh(){
+                stringified_diction=JSON.stringify(dictionary_sites);
+                alert(stringified_diction);
+                let inputs={
+                    "OffsetM1":offsetM1,
+                    "HeightM1":heightM1,
+                    "OffsetM2":offsetM2,
+                    "HeightM2":heightM2,
+                    "OffsetV1V2":offsetV1V2,
+                    "HeightV1V2":heightV1V2
+                }
+                alert(JSON.stringify(inputs,null, 2));
+            }
+        </script>
+        <script>
+            //This is what we can use to pass to the python file, Most likely I will need to create a new one for the gds upload
+            var offsetM1;
+            var heightM1;
+            var offsetM2;
+            var heightM2;
+            var offsetV1V2;
+            var heightV1V2;
+            document.getElementById('generateMesh').addEventListener('click', function() {
+            // Get all the input elements
+            offsetM1 = document.getElementById('offsetM1').value;
+            heightM1 = document.getElementById('height1').value;
+            offsetM2 = document.getElementById('offsetM2').value;
+            heightM2 = document.getElementById('heightM2').value;
+            offsetV1V2 = document.getElementById('offsetV1V2').value;
+            heightV1V2 = document.getElementById('heightV1V2').value;
+            
+            // Check if any of the fields are empty
+            if (offsetM1 && heightM1 && offsetM2 && heightM2 && offsetV1V2 && heightV1V2) {
+                // If all fields have values, you can proceed with your mesh generation
+                alert('All fields are filled. Generating mesh...');
+                generateGDSMesh();
+            } else {
+                // If any field is empty, display an error message
+                alert('Please fill in all of the input fields before proceeding.');
+            }
+        });
+            document.querySelectorAll('input').forEach(input => {
+                input.addEventListener('input', function() {
+                    const allFilled = document.querySelectorAll('input').forEach(input => input.value.trim() !== "");
+                    document.getElementById('generateMesh').disabled = !allFilled;
+                });
+            });
+        </script>
+   </body>
 </html>
