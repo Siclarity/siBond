@@ -238,6 +238,20 @@ def update_thumbnail():
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
+@app.route('/generate_gds_mesh', methods=['POST'])
+def meshGenerate_gds():
+    data = request.json  # Get the incoming JSON data from the client
+    print("Received data:", data)
+    # Process the data (here, just calling a function to simulate processing)
+    # result = process_data(data)
+
+    # Return a response (you can return results if needed, or just a success message)
+    return jsonify({'message': 'Success'})  # This can be any result you'd like to send back
+
+@app.route('/meshGDS')
+def temp():
+    return render_template('meshGDS.html')
+
 @app.route('/meshGenerator')
 def meshGenerator():
 

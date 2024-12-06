@@ -630,8 +630,6 @@
             function generateGDSMesh(){
                     // stringified_diction=JSON.stringify(dictionary_sites);
                     // alert(stringified_diction);
-                    if(input_fields && ran_unique_site){
-                    const converted_dict=JSON.stringify(dictionary_sites);
                     const data={
                         Dictionary:dictionary_sites,
                         OffsetM1:offsetM1,
@@ -643,11 +641,23 @@
                     }
                     alert(JSON.stringify(data,null, 2));
                     console.log(data);
-                }
-                else{
-
-                }
-            }
+                    fetch('/generate_gds_mesh', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)  // Send the data as JSON
+                    })
+                    .then(response => response.json())  // Wait for the server response
+                    .then(data => {
+                        // Once the data is processed, redirect to the custom page
+                        window.location.href = '/meshGDS'; 
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('There was an error processing your request. Please try again.');
+                    });
+}
         </script>
         <script>
             //This is what we can use to pass to the python file, Most likely I will need to create a new one for the gds upload
