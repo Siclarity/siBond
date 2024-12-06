@@ -1,0 +1,5 @@
+klayout==0.29.7
+numpy==1.24.3
+python_gdsii==0.2.1
+pyvista==0.44.1
+Rtree==1.0.1

@@ -2,32 +2,92 @@ import pyvista as pv
 import numpy as np
 
 #These are the variables that are independent variables/grabbed from gds file
-SiO2_w_top=25
-SiO2_d_top=25
-SiO2_h_top=30
+def create_mesh():
+    SiO2_w_top=25
+    SiO2_d_top=25
+    SiO2_h_top=30
 
-Cu_r_top=2
-Cu_h_top=10
-Cu_dish_top=2000e-3
+    Cu_r_top=2
+    Cu_h_top=10
+    Cu_dish_top=2000e-3
 
-SiO2_w_bot=20
-SiO2_d_bot=20
-SiO2_h_bot=40
+    SiO2_w_bot=20
+    SiO2_d_bot=20
+    SiO2_h_bot=40
 
-Cu_r_bot=1.99
-Cu_h_bot=9.99
-Cu_dish_bot=2000e-3
+    Cu_r_bot=1.99
+    Cu_h_bot=9.99
+    Cu_dish_bot=2000e-3
 
-offset_x=0
-offset_y=0
+    offset_x=0
+    offset_y=0
 
-recess_shape="ellipse"
-square_param_l=2
-square_param_w=1
-shift_recess_top=2
-shift_recess_bot=5
-CD=0
-temp=300
+    recess_shape="ellipse"
+    shift_recess_top=2
+    shift_recess_bot=5
+    CD=0
+    temp=300
+    #non-user interfaced code
+    TiN_r_top=Cu_r_top+0.01
+    TiN_h_top=Cu_h_top+0.01
+    TiN_r_bot=Cu_r_bot+0.01
+    TiN_h_bot=Cu_h_bot+0.01
+    bot_TiN_movement=(SiO2_h_bot)/2-(TiN_h_bot)
+    top_TiN_movement=(SiO2_h_bot)/2+(SiO2_h_top)/2
+    #generates the Top SiO2 block
+    SiO2_top_dimension=(SiO2_w_top,SiO2_d_top,SiO2_h_top)
+    SiO2_top_mat=Material("SiO2",SiO2_top_dimension,"Normal")
+    SiO2_top=gen_SiO2_block(SiO2_top_mat.shape,'top')
+    SiO2_top=SiO2_top.mesh_gen()
+    SiO2_top=SiO2_top.translate((0,0,top_TiN_movement))
+    #generates the Bottom SiO2 block
+    SiO2_bot_dimension=(SiO2_w_bot,SiO2_d_bot,SiO2_h_bot)
+    SiO2_bot_mat=Material("SiO2",SiO2_bot_dimension,"Normal")
+    SiO2_bot=gen_SiO2_block(SiO2_bot_mat.shape,'bot')
+    SiO2_bot=SiO2_bot.mesh_gen()
+    #Displays the 2 SiO2 blocks
+    plot=pv.Plotter()
+    plot.add_mesh(SiO2_top,color='cyan',opacity=0.75)
+    plot.add_mesh(SiO2_bot,color='red',opacity=0.75)
+    plot.show()
+    #generates the Top Thin TiN layer
+    TiN_dimension_top=(TiN_r_top,TiN_h_top)
+    TiN_top_mat=Material("TiN",TiN_dimension_top,"Finer")
+    TiN_top=gen_TiN_layer(TiN_top_mat.shape,'top')
+    TiN_top=TiN_top.mesh_gen()
+    TiN_top=TiN_top.translate((0,0,top_TiN_movement))
+    #generates the Bottom Thin TiN layer
+    TiN_dimension_bot=(TiN_r_bot,TiN_h_bot)
+    TiN_bot_mat=Material("TiN",TiN_dimension_bot,"Finer")
+    TiN_bot=gen_TiN_layer(TiN_bot_mat.shape,'bot')
+    TiN_bot=TiN_bot.mesh_gen()
+    #Displays the 2 TiN layers within the SiO2 blocks
+    plot=pv.Plotter()
+    plot.add_mesh(SiO2_bot,color='cyan',opacity=0.5)
+    plot.add_mesh(TiN_bot,color='red',opacity=0.75)
+    plot.add_mesh(SiO2_top,color='cyan',opacity=0.5)
+    plot.add_mesh(TiN_top,color='green',opacity=0.75)
+    plot.show()
+    #generates the Top Copper
+    Cu_top_dimension=(Cu_r_top,Cu_h_top)
+    Copper_top_mat=Material("Cu",Cu_top_dimension,"Finer")
+    Copper_top=gen_Copper_piece(Copper_top_mat.shape,Cu_dish_top,'top',recess_shape)
+    Copper_top=Copper_top.mesh_gen()
+    #generates the Bottom Copper
+    Cu_bot_dimension=(Cu_r_bot,Cu_h_bot)
+    Copper_bot_mat=Material("Cu",Cu_bot_dimension,"Finer")
+    Copper_bot=gen_Copper_piece(Copper_bot_mat.shape,Cu_dish_bot,'bot',recess_shape)
+    Copper_bot=Copper_bot.mesh_gen()
+
+    #generates the full assembly
+    plot=pv.Plotter()
+    plot.add_mesh(SiO2_bot,color='cyan',opacity=0.25)
+    plot.add_mesh(TiN_bot,color='silver',opacity=0.5)
+    plot.add_mesh(Copper_bot,color='red',opacity=1)
+    plot.add_mesh(SiO2_top,color='cyan',opacity=0.25)
+    plot.add_mesh(TiN_top,color='black',opacity=0.5)
+    plot.add_mesh(Copper_top,color='yellow',opacity=1)
+    plot.show()
 
 class Material:
     def __init__(self,material,shape,mesh):
@@ -62,10 +122,10 @@ class gen_SiO2_block:
         SiO2_cube=SiO2_cube.triangulate()
         TiN_hole=TiN_hole.triangulate()
         SiO2_cube_fin=SiO2_cube.boolean_difference(TiN_hole)
-        plotter=pv.Plotter()
-        plotter.add_mesh(SiO2_cube_fin,color="cyan",opacity=0.75)
+        # plotter=pv.Plotter()
+        # plotter.add_mesh(SiO2_cube_fin,color="cyan",opacity=0.75)
         #plotter.add_mesh(TiN_hole,color="gray",opacity=0.9)
-        plotter.show()
+        # plotter.show()
         return SiO2_cube_fin
 
 #purpose of this class is to generate the TiN thin layer
@@ -101,13 +161,13 @@ class gen_TiN_layer:
         Copper_rem=Copper_rem.triangulate()
         TiN=TiN_hole.boolean_difference(Copper_rem)
         #TiN=TiN.clean()
-        plotter2=pv.Plotter()
-        if(self.position=='top'):
-            color='lightblue'
-        else:
-            color='gray'
-        plotter2.add_mesh(TiN,color,style="wireframe",line_width=10,opacity=0.75)
-        plotter2.show()
+        # plotter2=pv.Plotter()
+        # if(self.position=='top'):
+        #     color='lightblue'
+        # else:
+        #     color='gray'
+        # plotter2.add_mesh(TiN,color,style="wireframe",line_width=10,opacity=0.75)
+        # plotter2.show()
         return TiN
 
 
@@ -118,7 +178,7 @@ class gen_Copper_piece:
         if(indent=='ellipse'):
             self.indent_radius=dim
         if(indent=='square'):
-            self.indent_length,self.indent_width,self.indent_depth=dim
+            self.indent_depth=dim
         elif(indent=='sphere'):
             self.indent_radius=dim
         self.position=position
@@ -155,34 +215,34 @@ class gen_Copper_piece:
             Copper_dished=Copper.boolean_difference(ellipsoid)
             if(self.position=='top'):
                 Copper_dished=Copper_dished.rotate_y(180)
-            plotter3=pv.Plotter()
-            #plotter3.add_mesh(ellipsoid,color="green",opacity=0.75)
-            plotter3.add_mesh(Copper_dished,color="orange",opacity=0.9)
-            plotter3.show()
+            # plotter3=pv.Plotter()
+            # plotter3.add_mesh(ellipsoid,color="green",opacity=0.75)
+            # plotter3.add_mesh(Copper_dished,color="orange",opacity=0.9)
+            # plotter3.show()
             
         elif(self.indent=='square'):
-            Cu_cube=pv.Cube(center=(0,0,0),bounds=(-(self.indent_length),(self.indent_length),-(self.indent_width),(self.indent_width),-(self.indent_depth),(self.indent_depth)))
+            Cu_cube=pv.Cube(center=(0,0,0),bounds=(-(self.indent_depth),(self.indent_depth),-(self.indent_depth),(self.indent_depth),-(self.indent_depth),(self.indent_depth)))
             Cu_cube=Cu_cube.triangulate()
             Cu_cube=Cu_cube.translate((0,0,height_offset/2))
             Copper_dished=Copper.boolean_difference(Cu_cube)
             if(self.position=='top'):
                 Copper_dished=Copper_dished.rotate_y(180)
-            plotter3=pv.Plotter()
-            plotter3.add_mesh(Cu_cube,color='red',opacity=0.75)
-            plotter3.add_mesh(Copper,color='orange',opacity=0.25)
-            plotter3.add_mesh(Copper_dished,color='orange',opacity=0.5)
-            plotter3.show()
+            # plotter3=pv.Plotter()
+            # plotter3.add_mesh(Cu_cube,color='red',opacity=0.75)
+            # plotter3.add_mesh(Copper,color='orange',opacity=0.25)
+            # plotter3.add_mesh(Copper_dished,color='orange',opacity=0.5)
+            # plotter3.show()
         elif(self.indent=='sphere'):
             Cu_sphere=pv.Sphere(center=(0,0,0),radius=self.radius)
             Cu_sphere=Cu_sphere.translate((0,0,height_offset/2))
             Copper_dished=Copper.boolean_difference(Cu_sphere)
             if(self.position=='top'):
                 Copper_dished=Copper_dished.rotate_y(180)
-            plotter3=pv.Plotter()
-            plotter3.add_mesh(Cu_sphere,color='black',opacity=0.75)
-            plotter3.add_mesh(Copper,color='orange',opacity=0.25)
-            plotter3.add_mesh(Copper_dished,color='orange',opacity=0.5)
-            plotter3.show()
+            # plotter3=pv.Plotter()
+            # plotter3.add_mesh(Cu_sphere,color='black',opacity=0.75)
+            # plotter3.add_mesh(Copper,color='orange',opacity=0.25)
+            # plotter3.add_mesh(Copper_dished,color='orange',opacity=0.5)
+            # plotter3.show()
         if(self.position=='top'):
             #distance+=0.1
             Copper_dished=Copper_dished.translate((offset_x,offset_y,distance))
@@ -191,64 +251,3 @@ class gen_Copper_piece:
             Copper_dished=Copper_dished.translate((-offset_x,-offset_y,distance))
         return Copper_dished
 
-#non-user interfaced code
-TiN_r_top=Cu_r_top+0.01
-TiN_h_top=Cu_h_top+0.01
-TiN_r_bot=Cu_r_bot+0.01
-TiN_h_bot=Cu_h_bot+0.01
-bot_TiN_movement=(SiO2_h_bot)/2-(TiN_h_bot)
-top_TiN_movement=(SiO2_h_bot)/2+(SiO2_h_top)/2
-#generates the Top SiO2 block
-SiO2_top_dimension=(SiO2_w_top,SiO2_d_top,SiO2_h_top)
-SiO2_top_mat=Material("SiO2",SiO2_top_dimension,"Normal")
-SiO2_top=gen_SiO2_block(SiO2_top_mat.shape,'top')
-SiO2_top=SiO2_top.mesh_gen()
-SiO2_top=SiO2_top.translate((0,0,top_TiN_movement))
-#generates the Bottom SiO2 block
-SiO2_bot_dimension=(SiO2_w_bot,SiO2_d_bot,SiO2_h_bot)
-SiO2_bot_mat=Material("SiO2",SiO2_bot_dimension,"Normal")
-SiO2_bot=gen_SiO2_block(SiO2_bot_mat.shape,'bot')
-SiO2_bot=SiO2_bot.mesh_gen()
-#Displays the 2 SiO2 blocks
-plot=pv.Plotter()
-plot.add_mesh(SiO2_top,color='cyan',opacity=0.75)
-plot.add_mesh(SiO2_bot,color='red',opacity=0.75)
-plot.show()
-#generates the Top Thin TiN layer
-TiN_dimension_top=(TiN_r_top,TiN_h_top)
-TiN_top_mat=Material("TiN",TiN_dimension_top,"Finer")
-TiN_top=gen_TiN_layer(TiN_top_mat.shape,'top')
-TiN_top=TiN_top.mesh_gen()
-TiN_top=TiN_top.translate((0,0,top_TiN_movement))
-#generates the Bottom Thin TiN layer
-TiN_dimension_bot=(TiN_r_bot,TiN_h_bot)
-TiN_bot_mat=Material("TiN",TiN_dimension_bot,"Finer")
-TiN_bot=gen_TiN_layer(TiN_bot_mat.shape,'bot')
-TiN_bot=TiN_bot.mesh_gen()
-#Displays the 2 TiN layers within the SiO2 blocks
-plot=pv.Plotter()
-plot.add_mesh(SiO2_bot,color='cyan',opacity=0.5)
-plot.add_mesh(TiN_bot,color='red',opacity=0.75)
-plot.add_mesh(SiO2_top,color='cyan',opacity=0.5)
-plot.add_mesh(TiN_top,color='green',opacity=0.75)
-plot.show()
-#generates the Top Copper
-Cu_top_dimension=(Cu_r_top,Cu_h_top)
-Copper_top_mat=Material("Cu",Cu_top_dimension,"Finer")
-Copper_top=gen_Copper_piece(Copper_top_mat.shape,Cu_dish_top,'top',recess_shape)
-Copper_top=Copper_top.mesh_gen()
-#generates the Bottom Copper
-Cu_bot_dimension=(Cu_r_bot,Cu_h_bot)
-Copper_bot_mat=Material("Cu",Cu_bot_dimension,"Finer")
-Copper_bot=gen_Copper_piece(Copper_bot_mat.shape,Cu_dish_bot,'bot',recess_shape)
-Copper_bot=Copper_bot.mesh_gen()
-
-#generates the full assembly
-plot=pv.Plotter()
-plot.add_mesh(SiO2_bot,color='cyan',opacity=0.25)
-plot.add_mesh(TiN_bot,color='silver',opacity=0.5)
-plot.add_mesh(Copper_bot,color='red',opacity=1)
-plot.add_mesh(SiO2_top,color='cyan',opacity=0.25)
-plot.add_mesh(TiN_top,color='black',opacity=0.5)
-plot.add_mesh(Copper_top,color='yellow',opacity=1)
-plot.show()
