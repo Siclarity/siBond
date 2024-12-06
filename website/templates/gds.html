@@ -334,11 +334,7 @@
                         }
                         FM.textContent=`Full Match: ${data.Result.Full_Matched}`;
                         document.getElementById("Information").appendChild(FM);
-                        
-                        const generate_mesh=document.getElementById('generateMesh');
-                        generate_mesh.disabled=false;
-                        generate_mesh.classList.add('active');
-
+                        ran_unique_site=true;
                     })
                 }
         </script>
@@ -535,7 +531,7 @@
                             }
                         });
                         const but_search = document.getElementById("bondSearch");
-                        but_search.disabled=false;
+                        but_search.disabled=false;  
                     })
                     .catch(error => console.error('Error loading gallery:', error));
             }
@@ -624,22 +620,33 @@
                 if(fm){
                     fm.textContent='';
                 }
+                ran_unique_site=false;
             }
         </script>
         <script>
+            var ran_unique_site=false;
+            var input_fields =false;
             //This is the function that runs which will fetch the new route this only runs when only all input fields have been filled and the run bondsite has been done
             function generateGDSMesh(){
-                stringified_diction=JSON.stringify(dictionary_sites);
-                alert(stringified_diction);
-                let inputs={
-                    "OffsetM1":offsetM1,
-                    "HeightM1":heightM1,
-                    "OffsetM2":offsetM2,
-                    "HeightM2":heightM2,
-                    "OffsetV1V2":offsetV1V2,
-                    "HeightV1V2":heightV1V2
+                    // stringified_diction=JSON.stringify(dictionary_sites);
+                    // alert(stringified_diction);
+                    if(input_fields && ran_unique_site){
+                    const converted_dict=JSON.stringify(dictionary_sites);
+                    const data={
+                        Dictionary:dictionary_sites,
+                        OffsetM1:offsetM1,
+                        HeightM1:heightM1,
+                        OffsetM2:offsetM2,
+                        HeightM2:heightM2,
+                        OffsetV1V2:offsetV1V2,
+                        HeightV1V2:heightV1V2
+                    }
+                    alert(JSON.stringify(data,null, 2));
+                    console.log(data);
                 }
-                alert(JSON.stringify(inputs,null, 2));
+                else{
+
+                }
             }
         </script>
         <script>
@@ -652,29 +659,55 @@
             var heightV1V2;
             document.getElementById('generateMesh').addEventListener('click', function() {
             // Get all the input elements
-            offsetM1 = document.getElementById('offsetM1').value;
-            heightM1 = document.getElementById('height1').value;
-            offsetM2 = document.getElementById('offsetM2').value;
-            heightM2 = document.getElementById('heightM2').value;
-            offsetV1V2 = document.getElementById('offsetV1V2').value;
-            heightV1V2 = document.getElementById('heightV1V2').value;
-            
-            // Check if any of the fields are empty
-            if (offsetM1 && heightM1 && offsetM2 && heightM2 && offsetV1V2 && heightV1V2) {
-                // If all fields have values, you can proceed with your mesh generation
-                alert('All fields are filled. Generating mesh...');
-                generateGDSMesh();
-            } else {
-                // If any field is empty, display an error message
-                alert('Please fill in all of the input fields before proceeding.');
-            }
+                offsetM1 = document.getElementById('offsetM1').value;
+                heightM1 = document.getElementById('height1').value;
+                offsetM2 = document.getElementById('offsetM2').value;
+                heightM2 = document.getElementById('heightM2').value;
+                offsetV1V2 = document.getElementById('offsetV1V2').value;
+                heightV1V2 = document.getElementById('heightV1V2').value;
+                
+                // Check if any of the fields are empty
+                if (offsetM1 && heightM1 && offsetM2 && heightM2 && offsetV1V2 && heightV1V2) {
+                    // If all fields have values, you can proceed with your mesh generation
+                    alert('All fields are filled. Generating mesh...');
+                    generateGDSMesh();
+                } else {
+                    // If any field is empty, display an error message
+                    alert('Please fill in all of the input fields before proceeding.');
+                }
         });
-            document.querySelectorAll('input').forEach(input => {
-                input.addEventListener('input', function() {
-                    const allFilled = document.querySelectorAll('input').forEach(input => input.value.trim() !== "");
-                    document.getElementById('generateMesh').disabled = !allFilled;
-                });
+        document.querySelectorAll('.M input').forEach(input => {
+            input.addEventListener('input', function() {
+                // Get all input elements
+                const inputs = document.querySelectorAll('.M input');
+                
+                // Count how many inputs are filled
+                const filledCount = Array.from(inputs).filter(input => input.value.trim() !== "").length;
+
+                // Log the filled count for debugging
+                console.log(`Filled count = ${filledCount}`);
+                
+                // Check if all 6 inputs are filled
+                input_fields = filledCount === 6;
+
+                // Log the input_fields status (true or false)
+                console.log(`Input fields filled: ${input_fields}`);
             });
+        });
+        function button_status(){
+            console.log(`Input Fields:${input_fields}`);
+            console.log(`Unique Sites:${ran_unique_site}`);
+            const generate_mesh=document.getElementById('generateMesh');
+            if(input_fields && ran_unique_site){
+                generate_mesh.disabled=false;
+                generate_mesh.classList.add('active');
+            }
+            else{
+                generate_mesh.classList.remove('active');
+                generate_mesh.disabled=true;
+            }
+        }
+        setInterval(button_status, 1000);
         </script>
    </body>
 </html>

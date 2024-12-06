@@ -75,7 +75,7 @@ def unique_pictures(gds_files_path, diction, layer_properties, width=1000, heigh
         # print(f'Y1:{y1}')
         # print(f'X2:{x2}')
         # print(f'Y2:{y2}')
-        tol=2
+        tol=500
         x1-=tol
         y1-=tol
         x2+=tol
@@ -85,7 +85,7 @@ def unique_pictures(gds_files_path, diction, layer_properties, width=1000, heigh
         # print(f'Y1:{y1}')
         # print(f'X2:{x2}')
         # print(f'Y2:{y2}')
-        scale_factor=0.5
+        scale_factor=0.01
         # print(f'Scale Factor:{scale_factor}')
         box_width = (x2 - x1) * scale_factor
         box_height = (y2 - y1) * scale_factor
