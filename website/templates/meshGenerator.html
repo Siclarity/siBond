@@ -183,7 +183,7 @@
                     <div class="spacer"></div>
                     <div class="parameters_over">
                         <form class="P" id="overlay">
-                            <h4>Overlay</h4>
+                            <h4>Overlay [µm]</h4>
                             <input type="number" class="overlay_x" id="overlay_x" placeholder="x offset default(0)" name="overlay_x">
                             <input type="number" class="overlay_y" id="overlay_y" placeholder="y offset default(0)" name="overlay_y">
                         </form>
@@ -219,28 +219,28 @@
                     </div>
                     <div class="Die1_P">
                         <form class="P neutral-border" id="Top SiO2 Height">
-                            <h4>SiO2 Height</h4>
+                            <h4>SiO2 Height [µm]</h4>
                             <input type="number" class="sio2h1" id="sio2h1" placeholder="10" name="sio2h1" min="0.1" step="any">
                         </form>
                         <form class="P neutral-border" id="Top SiO2 Width">
-                            <h4>SiO2 Width</h4>
+                            <h4>SiO2 Width [µm]</h4>
                             <input type="number" class="sio2w1" id="sio2w1" placeholder="10" name="sio2w1" min="0.1" step="any">
                         </form>
                         <form class="P neutral-border" id="Top SiO2 Depth">
-                            <h4>SiO2 depth</h4>
+                            <h4>SiO2 Depth [µm]</h4>
                             <input type="number" class="sio2d1" id="sio2d1" placeholder="15" name="sio2d1" min="0.1" step="any">
                         </form>
                         <form class="P neutral-border" id="Top Copper Radius">
-                            <h4>Copper Radius</h4>
+                            <h4>Copper Radius [µm]</h4>
                             <input type="number" class="cr1" id="cr1" placeholder="2" name="cr1" min="0.1" step="any">
                         </form>
                         <form class="P neutral-border" id="Top Copper Height">
-                            <h4>Copper Height</h4>
+                            <h4>Copper Height [µm]</h4>
                             <input type="number" class="ch1" id="ch1" placeholder="10" name="ch1" min="0.1" step="any">
                         </form>
                         <form class="P neutral-border" id="Top Copper Recess">
-                            <h4>Copper Recess</h4>
-                            <input type="number" class="cd1" id="cd1" placeholder="Input is in nm" name="cd1" min="0" step="any">
+                            <h4>Copper Recess [nm]</h4>
+                            <input type="number" class="cd1" id="cd1" placeholder="4" name="cd1" min="0" step="any">
                         </form>
                     </div>
                     <div class="Die_text">
@@ -248,28 +248,28 @@
                     </div>
                     <div class="Die2_P">
                         <form class="P neutral-border" id="Bot SiO2 Height">
-                            <h4>SiO2 Height</h4>
+                            <h4>SiO2 Height [µm]</h4>
                             <input type="number" class="sio2h2" id="sio2h2" placeholder="10" name="sio2h2" min="0.1" step="any">
                         </form>
                         <form class="P neutral-border"  id="Bot SiO2 Width">
-                            <h4>SiO2 Width</h4>
+                            <h4>SiO2 Width [µm]</h4>
                             <input type="number" class="sio2w2" id="sio2w2" placeholder="10" name="sio2w2" min="0.1" step="any">
                         </form>
                         <form class="P neutral-border" id="Bot SiO2 Depth">
-                            <h4>SiO2 depth</h4>
+                            <h4>SiO2 Depth [µm]</h4>
                             <input type="number"  class="sio2d2" id="sio2d2" placeholder="15" name="sio2d2" min="0.1" step="any">
                         </form>
                         <form class="P neutral-border" id="Bot Copper Radius">
-                            <h4>Copper Radius</h4>
+                            <h4>Copper Radius [µm]</h4>
                             <input type="number"  class="cr2" id="cr2" placeholder="2" name="cr2" min="0.1" step="any">
                         </form>
                         <form class="P neutral-border" id="Bot Copper Height">
-                            <h4>Copper Height</h4>
+                            <h4>Copper Height [µm]</h4>
                             <input type="number" class="ch2" id="ch2" placeholder="10" name="ch2" min="0.1" step="any">
                         </form>
                         <form class="P neutral-border" id="Bot Copper Recess">
-                            <h4>Copper Recess</h4>
-                            <input type="number"  class="cd2" id="cd2" placeholder="Input is in nm" name="cd2" min="0" step="any">
+                            <h4>Copper Recess [nm]</h4>
+                            <input type="number"  class="cd2" id="cd2" placeholder="4" name="cd2" min="0" step="any">
                         </form>
                     </div>
 
@@ -694,6 +694,7 @@
                     }
                     alert(JSON.stringify(topSiO2,null, 2));
                     alert(JSON.stringify(botSiO2,null, 2));
+                    window.location.href = '/mesh'; 
                 }
             });
 

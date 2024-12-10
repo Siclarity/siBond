@@ -337,16 +337,19 @@ def search(filename):
                     a,a_area,b_area=calculate_areas(a,b,c,d)
                     a=a.bbox()
                     print(f"Shape 1's new bbox:{a}")
+                    effective_area=min(a_area,b_area)
                 elif c=='Box' and d=='Polygon':
                     b,b_area,a_area=calculate_areas(a,b,c,d)
                     b=b.bbox()
                     print(f"Shape 2's new bbox:{b}")
+                    effective_area=min(a_area,b_area)
                 elif c=="Polygon" and d=='Polygon':
                     a,a_area,b,b_area=calculate_areas(a,b,c,d)
                     #A will be the intersection area hence the a_area will be the intersection area
                     a=a.bbox()
                     #B will be the union area hence the b_area will be the union area
                     b=b.bbox()
+                    effective_area=min(a_area,b_area)
                 else:
                     a_area,b_area=calculate_areas(a,b,c,d)
                     min_left=min(a.left,b.left)
@@ -366,7 +369,6 @@ def search(filename):
                 print("Passed the reassignment of bounding box/area calculations for the box")
                 # width=(min_right-max_left)
                 # height=(min_top-max_bot)
-                effective_area=min(a_area,b_area)
                 x_left=a.left-b.left
                 x_right=a.right-b.right
                 y_bot=a.bottom-b.bottom

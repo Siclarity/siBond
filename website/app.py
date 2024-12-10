@@ -242,20 +242,22 @@ def update_thumbnail():
 def meshGenerate_gds():
     data = request.json  # Get the incoming JSON data from the client
     print("Received data:", data)
-    # Process the data (here, just calling a function to simulate processing)
-    # result = process_data(data)
-
+    #writing the data that the user inputs and the backend data to a file which can be used for the python code, this file can be used for the new mesh python file
+    with open("bonding_sites.json","w") as outfile:
+        dump(data,outfile)
     # Return a response (you can return results if needed, or just a success message)
-    return jsonify({'message': 'Success'})  # This can be any result you'd like to send back
+    return jsonify({'message': 'Success'})  # This will then forward the user to the meshGDS page
 
-@app.route('/meshGDS')
+@app.route('/mesh',methods=["GET","POST"])
 def temp():
-    return render_template('meshGDS.html')
+    if request.method=='GET':
+        return render_template('mesh.html')
+    else:
+        return  "Not yet"
 
 @app.route('/meshGenerator')
 def meshGenerator():
-
-    return render_template('meshGenerator.html')
+        return render_template('meshGenerator.html')
 # @app.route('/meshGenerator',methods=['GET','POST'])
 # def meshGenerator():
 #   if request.method=='POST':
