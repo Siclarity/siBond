@@ -692,12 +692,45 @@
                         RecessShape:recess_shape,
                         Recess:cd2
                     }
+                    let data={
+                        TSiO2h:sio2h1,
+                        TSiO2w:sio2w1,
+                        TSiO2l:sio2d1,
+                        TCopperR:cr1,
+                        TCopperH:ch1,
+                        TRecessShape:recess_shape,
+                        TRecess:cd1,
+                        BSiO2h:sio2h2,
+                        BSiO2w:sio2w2,
+                        BSiO2l:sio2d2,
+                        BCopperR:cr2,
+                        BCopperH:ch2,
+                        BRecessShape:recess_shape,
+                        BRecess:cd2,
+                        O_x:ox,
+                        O_y:oy
+
+                    }
                     alert(JSON.stringify(topSiO2,null, 2));
                     alert(JSON.stringify(botSiO2,null, 2));
-                    window.location.href = '/mesh'; 
-                }
-            });
-
+                    fetch('/generate_gds_mesh', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)  // Send the data as JSON
+                    })
+                    .then(response => response.json())  // Wait for the server response
+                    .then(data => {
+                        // Once the data is processed, redirect to the custom page
+                        window.location.href = '/mesh'; 
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('There was an error processing your request. Please try again.');
+                    });
+            }
+        });
             document.body.addEventListener('input', function(e) {
                 // Ensure the event target is a number input
                 const submitButton=document.getElementById('submitButton');
