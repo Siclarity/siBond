@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Upload GDS File</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+        <style>
+            .topbar{
+                width:100%;
+                display:flex;
+                flex-direction: row;
+                background-color: #D9D9D9;
+                border-bottom:groove #000;
+                margin:0;
+            }
+            .topbar h1{
+                color: #000;
+                font-family: Inter;
+                font-size: 24px;
+                font-style: normal;
+                font-weight: 600;
+                line-height: normal;
+                text-align: right;
+                padding-left:50vw;
+            }
+            .topbar img{
+                width: 228px;
+                height: 52px; 
+                flex-shrink:0;
+            }
+            body{
+                background-color: #D9D9D9;
+            }
+            .inner-body{
+                display:flex;
+                flex-direction: row;
+            }
+            .whitespace{
+                background-color: white;
+                width:90vw;
+                height:90vh;
+                display: flex;
+            }
+            .left-side-box{
+                display:flex;
+                flex-direction: column;
+                border-right:solid black;
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+            .left-side-box .File_input{
+                color: #000;
+                font-family: Inter;
+                font-size: 24px;
+                font-style: normal;
+                font-weight: 300;
+                line-height: normal;
+            }
+            .left-side-box .File_input .filepath{
+                background-color: white;
+            }
+            .left-side-box a{
+                color: #000;
+                font-family: Inter;
+                font-size: 24px;
+                font-style: normal;
+                font-weight: 300;
+                line-height: normal;
+                padding-top:10vh;
+            }
+            .left-side-box .spacer{
+                padding-bottom: 5vh;
+            }
+
+            .left-side-box .M{
+                display: inline-flex;
+                flex-direction: column;
+                height: 154px;
+                min-width: 320px;
+                align-items: flex-start;
+                flex-shrink: 0;
+                background-color: white;
+                border-radius: 5%;
+                font-family: Inter;
+                font-size: 24px;
+                font-style: normal;
+                font-weight: 300;
+                line-height: normal;
+                padding-left: 24px;
+                padding-right:24px;
+                padding-bottom:24px;
+            }
+            * {box-sizing: border-box;}
+            .img-zoom-container {
+                position: relative;
+            }
+
+            .img-zoom-lens {
+            position: absolute;
+            border: 1px solid #d4d4d4;
+            }
+
+            .img-zoom-result {
+            border: 1px solid #d4d4d4;
+            /*set the size of the result div:*/
+            width: 600px;
+            height: 600px;
+            }
+            .unique_site,.offsetMatch,.fullMatch{
+                font-family: Inter;
+                font-size: 24px;
+                font-style: normal;
+                font-weight: 300;
+                line-height: normal;
+                padding: 10px;
+                margin:10px;
+            }
+            .gallery {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            .gallery img {
+                width: 200px;
+                height: auto;
+                border: 1px solid #ddd;
+            }
+            #generateMesh {
+            background-color: gray;
+            color: white;
+            cursor: not-allowed;
+            }
+            #generateMesh.active {
+                background-color: green;
+                cursor: pointer;
+            }
+        </style>
+        <script>
+            // Function to handle form submission
+            function handleFormSubmit(event) {
+                event.preventDefault(); // Prevent the default form submission
+    
+                // Get the value from the input field
+                //const projectFilepath = document.getElementById('myfile').value;
+                //Get the file input element
+                const fileInput = document.getElementById('myfile');
+                //gets the selected file
+                const file=fileInput.files[0]
+                // Make an AJAX POST request using fetch
+                // fetch('/getFile', {
+                //     method: 'POST',
+                //     headers: {
+                //         'Content-Type': 'application/json'
+                //     },
+                //     body: JSON.stringify({ file: projectFilepath })
+                // })
+                // .then(response => {
+                //     if (!response.ok) {
+                //         throw new Error("Network response was not ok: " + response.statusText);
+                //     }
+                //     return response.json();
+                // })
+                // .then(data => {
+                //     // Handle the response data
+                //     alert("Success: " + JSON.stringify(data));
+                // })
+                // .catch(error => {
+                //     // Handle any errors
+                //     console.error("Error:", error);
+                //     alert("Error: " + error.message);
+                // });
+                //Checks to see if the file is selected
+                if(!file){
+                    alert("Please select a file to upload");
+                    return;
+                }
+                //Creates a FormData object to send the file which we also use in the form 
+                const formData = new FormData();
+                //Append the file to the FormData object
+                formData.append('file', file);
+                // Make an AJAX POST request using fetch with FormData
+                fetch('/getFile', {
+                    method: 'POST',
+                    body: formData  // Send the FormData object containing the file
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Network response was not ok: " + response.statusText);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Handle the response data
+                    alert("Success: " + JSON.stringify(data));
+                    refreshImage();
+                })
+                .catch(error => {
+                    // Handle any errors
+                    console.error("Error:", error);
+                    alert("Error: " + error.message);
+                });
+            }
+        </script>
+    </head>
+    <body>  
+        <div class="topbar">
+            <img src="/static/images/SiClarity-Logo.png" alt="SiClarity-Logo"/>
+            <h1>MELD</h1>
+        </div>
+        <div class="inner-body">
+            <div class="left-side-box">
+                <div class="spacer"></div>
+                <form class="File_input" method="POST" enctype="multipart/form-data" onsubmit="handleFormSubmit(event)">
+                    <label for="myfile">Selected GDS file:</label>
+                    <input type="file" class="filepath" id="myfile" name="file" accept=".gds"/>
+                    <!-- <input type="submit" value="Upload File"> -->
+                    <!-- <button type="submit" onclick="getFile()">Upload File</button> -->
+                    <!-- <button type="submit" class="home_button" onclick="callBackendAPI()"> Upload File</button> -->
+                    <button type="submit" onclick="newFileUploaded()"> Upload File</button>
+                </form>
+                
+                <div class="spacer"></div>
+                <div class="lens_control">
+                    <label for="lens-width">Lens Width:</label>
+                    <input type="number" id="lens-width" value="100" min="10" max="400">
+                    <label for="lens-height">Lens Height:</label>
+                    <input type="number" id="lens-height" value="100" min="10" max="400">
+                    <button id="apply-lens-size">Apply</button>
+                </div>
+                <div class="spacer"></div>
+                <div class="layer-clicker-container">
+                    <h1>Layer Control</h1>
+                    <div id="layerContainer" class="layerContainer">
+                        <h3>Select Layers to Display:</h3>
+                        <div id="layers"></div>
+                    </div>
+                    <button id="load-layers-btn">Load Layers</button>
+                    <button id="update-thumbnail-btn">Update Thumbnail</button>
+                    <button id="refresh-Image" onclick="refreshImage()"> Refresh Image</button>
+                </div>
+                <div class="spacer"></div>
+                <form class="M">
+                    <h4>M1</h4>
+                    <input type="number" class="offset" id="offsetM1" placeholder="Offset" name="Offset_M1">
+                    <br>
+                    <input type="number" class="height" id="height1" placeholder="Height" name="Height_M1">
+                </form>
+                <div class="spacer"></div>
+                <form class="M">
+                    <h4>M2</h4>
+                    <input type="number" class="offset" id="offsetM2" placeholder="Offset" name="Offset_M2">
+                    <br>
+                    <input type="number" class="height" id="heightM2"placeholder="Height" name="Height_M2">
+                </form>
+                <div class="spacer"></div>
+                <form class="M">
+                    <h4>V1-V2</h4>
+                    <input type="number" class="offset" id="offsetV1V2" placeholder="Offset" name="Offset_V1V2">
+                    <br>
+                    <input type="number" class="height" id="heightV1V2"placeholder="Height" name="Height_V1V2">
+                </form>
+                <a href="/" ><button class="home_button"> Go Home</button></a>
+            </div>
+            <div class="whitespace">
+                <div class="img-zoom-container">
+                    {% if image_filename %}
+                        <!-- Dynamically render the image if a PNG file is found -->
+                        <!-- <p>{ url_for('uploads', filename=image_filename) } </p> -->
+                        <img src="{{ url_for('uploaded_file', filename=image_filename) }}" width="600" height="480" id="uploaded_image" alt="Uploaded Image">
+                        <div id="zresult" class="img-zoom-result"></div>
+                    {% else %}
+                        <p>No PNG file found.</p>
+                    {% endif %}
+                <button id="bondSearch" onclick="IdentifyUniqueBondingSites()"> Identify Unique Bonding Sites</button>
+                <button id="generateMesh" disabled> Unique Mesh Sites Generation </button>
+                </div>
+                <div class="gallery_container">
+                    <h1>Unique Bonding Sites Image Gallery</h1>
+                    <div id="gallery" class="gallery"></div> <!-- Images will appear here -->
+                </div>
+            </div>
+            <div class="Info_Container">
+                <h4> Information about the GDS File:</h4>
+                <div id="Information">
+                </div>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+          
+        <script>
+            var dictionary_sites;
+            function IdentifyUniqueBondingSites() {
+                const but_search = document.getElementById("bondSearch");
+                but_search.disabled=true;
+                // Get the new image source from the server
+                fetch('/search')  // Make a GET request to /h to get the updated image filename
+                .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        
+                    return response.json();  // Parse the response body as JSON
+                    })
+                .then(data => {
+                        // Handle the response data
+                        //alert("Success: " + JSON.stringify(data));
+                        dictionary_sites=data.Result.List_of_unique_bonding_site
+                        console.log(data.Result)
+                        console.log(dictionary_sites)
+                        let unique_site=document.querySelector(".unique_site");
+                        if(!unique_site){
+                            unique_site= document.createElement("DIV");
+                            unique_site.setAttribute("class", "unique_site");
+                            unique_site.setAttribute("id", "unique_site");
+                        }
+                        unique_site.textContent=`Unique Sites: ${data.Result.Total_Number_of_Unique_Sites}`;
+                        document.getElementById("Information").appendChild(unique_site);
+
+                        let OM=document.querySelector(".offsetMatch");
+                        if(!OM){
+                            OM = document.createElement("DIV");
+                            OM.setAttribute("class", "offsetMatch");
+                            OM.setAttribute("id", "offsetMatch");
+                        }
+                        OM.textContent=`Offset Match: ${data.Result.Offset_Matched}`;
+                        document.getElementById("Information").appendChild(OM);
+                        let FM=document.querySelector(".fullMatch");
+                        if(!FM){
+                            FM = document.createElement("DIV");
+                            FM.setAttribute("class", "fullMatch");
+                            FM.setAttribute("id","fullMatch");
+                        }
+                        FM.textContent=`Full Match: ${data.Result.Full_Matched}`;
+                        document.getElementById("Information").appendChild(FM);
+                        ran_unique_site=true;
+                    })
+                }
+        </script>
+
+        <script>
+        // document.getElementById('bondSearch').addEventListener('click', function(){
+        //     alert('Running BondSearch');
+        // });
+        // function callBackendAPI() {
+        //     fetch('/getFile')
+        //         .then(response => response.json())
+        //         .then(data => {
+        //             if (data.success) {
+        //                 alert("API call successful! Data: " + JSON.stringify(data.data));
+        //             } else {
+        //                 alert("Error: " + data.error);
+        //             }
+        //         })
+        //         .catch(error => {
+        //             alert("Failed to call API: " + error);
+        //         });
+        // }
+        
+        function imageZoom(imgID, resultID) {
+            var img, lens, result, cx, cy;
+            img = document.getElementById(imgID);
+            result = document.getElementById(resultID);
+            lens=document.querySelector(".img-zoom-lens");
+            if(!lens){
+                /* Create lens: */
+                lens = document.createElement("DIV");
+                lens.setAttribute("class", "img-zoom-lens");
+                /* Insert lens: */
+                img.parentElement.insertBefore(lens, img);
+            }
+            var lensWidth = document.getElementById("lens-width").value;
+            var lensHeight = document.getElementById("lens-height").value;
+            lens.style.width = lensWidth + "px";
+            lens.style.height = lensHeight + "px";
+            /* Calculate the ratio between result DIV and lens: */
+            cx = result.offsetWidth / lens.offsetWidth;
+            cy = result.offsetHeight / lens.offsetHeight;
+            /* Set background properties for the result DIV */
+            result.style.backgroundImage = "url('" + img.src + "')";
+            result.style.backgroundSize = (img.width * cx) + "px " + (img.height * cy) + "px";
+            /* Execute a function when someone moves the cursor over the image, or the lens: */
+            lens.addEventListener("mousemove", moveLens);
+            img.addEventListener("mousemove", moveLens);
+            /* And also for touch screens: */
+            lens.addEventListener("touchmove", moveLens);
+            img.addEventListener("touchmove", moveLens);
+            function moveLens(e) {
+                var pos, x, y;
+                /* Prevent any other actions that may occur when moving over the image */
+                e.preventDefault();
+                /* Get the cursor's x and y positions: */
+                pos = getCursorPos(e);
+                /* Calculate the position of the lens: */
+                x = pos.x - (lens.offsetWidth / 2);
+                y = pos.y - (lens.offsetHeight / 2);
+                /* Prevent the lens from being positioned outside the image: */
+                if (x > img.width - lens.offsetWidth) {x = img.width - lens.offsetWidth;}
+                if (x < 0) {x = 0;}
+                if (y > img.height - lens.offsetHeight) {y = img.height - lens.offsetHeight;}
+                if (y < 0) {y = 0;}
+                /* Set the position of the lens: */
+                lens.style.left = x + "px";
+                lens.style.top = y + "px";
+                /* Display what the lens "sees": */
+                result.style.backgroundPosition = "-" + (x * cx) + "px -" + (y * cy) + "px";
+            }
+            function getCursorPos(e) {
+                var a, x = 0, y = 0;
+                e = e || window.event;
+                /* Get the x and y positions of the image: */
+                a = img.getBoundingClientRect();
+                /* Calculate the cursor's x and y coordinates, relative to the image: */
+                x = e.pageX - a.left;
+                y = e.pageY - a.top;
+                /* Consider any page scrolling: */
+                x = x - window.pageXOffset;
+                y = y - window.pageYOffset;
+                return {x : x, y : y};
+            }
+        }
+        // if(document.getElementsByName("image_filename")!=null){
+        //         imageZoom("uploaded_image", "zresult")
+        //     }
+            // Event listener for the 'Apply' button to change the lens size
+    document.getElementById("apply-lens-size").addEventListener("click", function() {
+        var lensWidth = document.getElementById("lens-width").value;
+        var lensHeight = document.getElementById("lens-height").value;
+        var lens = document.querySelector(".img-zoom-lens");
+
+        // Update lens size
+        lens.style.width = lensWidth + "px";
+        lens.style.height = lensHeight + "px";
+
+        // Recalculate the zoom effect
+        imageZoom("uploaded_image", "zresult");
+    });
+        // const imageContainer = document.querySelector('.img-zoom-container');
+        //     imageContainer.addEventListener('mouseenter', () => {
+        //     imageContainer.addEventListener('mousemove', imageZoom("uploaded_image", "zresult"));
+        //     });
+
+        //     imageContainer.addEventListener('mouseleave', () => {
+        //     imageContainer.removeEventListener('mousemove', imageZoom("uploaded_image", "zresult"));
+        // });
+
+        </script>
+        <script>
+            imageZoom("uploaded_image","zresult");
+            function refreshImage() {
+                const imgElement = document.getElementById("uploaded_image");
+                const resultElement=document.getElementById("zresult");
+
+                // Get the new image source from the server
+                fetch('/gds', {
+                    method: 'POST',
+                })  // Make a GET request to /h to get the updated image filename
+                .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                    return response.json();  // Parse the response body as JSON
+                    })
+                .then(data => {
+                    // Extract the image filename from the JSON response
+                    const imageFilename = data.image_filename;
+            
+                    if (imageFilename) {
+                    // Update the image src with the new filename
+                        const imageUrl = `/uploads/${imageFilename}?t=${new Date().getTime()}`;
+                        imgElement.src = imageUrl; 
+                        imageZoom("uploaded_image", "zresult"); 
+                    } 
+                    else {
+                        console.log('No image filename provided');
+                    }
+                    
+                })
+                .catch(error => console.error('Error refreshing the image:', error));
+            }
+        //setInterval(refreshImage, 10000);
+        
+        </script>
+
+        <script>
+            function updateGallery() {
+                fetch('/gallery')
+                    .then(response => response.json())
+                    .then(images => {
+                        const gallery = document.getElementById('gallery');
+                        const existingImages = gallery.querySelectorAll('img');
+                        if (images.length === 0) {
+                            // Clear all images in the gallery
+                            existingImages.forEach(img => img.remove());
+                            console.log("Gallery is empty. Removed all images.");
+                            const generate_mesh=document.getElementById('generateMesh');
+                            generate_mesh.disabled=true;
+                            generate_mesh.classList.remove('active');
+                            return;
+                        }
+
+                        // Loop through all the images fetched from the server
+                        images.sort((a, b) => {
+                            // Extract the numeric part from the filenames using regular expression
+                            const numA = parseInt(a.match(/\d+/)[0]); // Extracts the number from filename a
+                            const numB = parseInt(b.match(/\d+/)[0]); // Extracts the number from filename b
+
+                            return numA - numB; // Sorts numerically
+                        });
+                        images.forEach(image => {
+                            // Check if the image already exists in the gallery
+                            const imageSrc = `/scripts/images/${image}`;
+                            const imageExists = Array.from(existingImages).some(img => img.alt === image);
+
+                            // If the image doesn't exist, add it
+                            if (!imageExists) {
+                                const imgElement = document.createElement('img');
+                                imgElement.src = imageSrc;
+                                imgElement.alt = image;
+
+                                // Append the image to the gallery
+                                gallery.appendChild(imgElement);
+                                console.log(`Added new image: ${image}`);
+                            } else {
+                                // If the image exists, you may want to update the src for cache busting (if content has changed)
+                                const updatedSrc = `${imageSrc}?v=${new Date().getTime()}`;
+                                const existingImage = Array.from(existingImages).find(img => img.alt === image);
+                                existingImage.src = updatedSrc;  // Update image with cache-busting query
+                                console.log(`Updated image: ${image}`);
+                            }
+                        });
+                        const but_search = document.getElementById("bondSearch");
+                        but_search.disabled=false;  
+                    })
+                    .catch(error => console.error('Error loading gallery:', error));
+            }
+        setInterval(updateGallery, 6000);
+        </script>
+        <script>
+        let availableLayers = [];
+        document.getElementById('load-layers-btn').addEventListener('click', function() {
+            fetch('/get_layers')
+                .then(response => response.json())
+                .then(layers => {
+                    console.log('Layers:', layers);
+                    // Use the data to create checkboxes dynamically
+                    populateLayerCheckboxes(layers);
+                })
+                .catch(error => {
+                    console.error('Error fetching layers:', error);
+                    alert('There was an error loading the layers.');
+            });
+        });
+
+        function populateLayerCheckboxes(layers) {
+            const layerContainer = document.getElementById('layerContainer'); // Make sure you have this element in your HTML
+            layerContainer.innerHTML ='';  // Clear existing checkboxes before adding new ones
+
+            layers.forEach(layer => {
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = `layer-${layer.layer}-${layer.datatype}`;
+                checkbox.value = `${layer.layer}-${layer.datatype}`;
+                const label = document.createElement('label');
+                label.setAttribute('for', checkbox.id);
+                label.innerText = layer.name;
+
+                const div = document.createElement('div');
+                div.appendChild(checkbox);
+                div.appendChild(label);
+                layerContainer.appendChild(div);
+            });
+        }
+        // Function to collect selected layers and update the thumbnail
+        document.getElementById('update-thumbnail-btn').addEventListener('click', function() {
+            const selectedLayers = [];
+            // Collect the selected layers
+            document.querySelectorAll('input[type="checkbox"]:checked').forEach((checkbox) => {
+                const [layer, datatype] = checkbox.value.split('-');
+                selectedLayers.push({ layer: parseInt(layer), datatype: parseInt(datatype) });
+            });
+
+            // Send the selected layers to the server to update the thumbnail
+            fetch('/update_thumbnail', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ layers: selectedLayers })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Thumbnail updated:', data);
+                if (data.status === 'error') {
+                    alert('Error: ' + data.message);
+                }
+                refreshImage();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+            
+        });
+        </script>
+        <script>
+            function newFileUploaded(){
+                //function just clears all outstanding objects such as previous layers and information
+                const layerContainer = document.getElementById('layerContainer');
+                layerContainer.innerHTML =''; 
+                var us=document.getElementById("unique_site");
+                if(us){
+                    us.textContent='';
+                }
+                var om=document.getElementById("offsetMatch");
+                if(om){
+                    om.textContent='';
+                }
+                var fm=document.getElementById("fullMatch");
+                if(fm){
+                    fm.textContent='';
+                }
+                ran_unique_site=false;
+            }
+        </script>
+        <script>
+            var ran_unique_site=false;
+            var input_fields =false;
+            //This is the function that runs which will fetch the new route this only runs when only all input fields have been filled and the run bondsite has been done
+            function generateGDSMesh(){
+                    // stringified_diction=JSON.stringify(dictionary_sites);
+                    // alert(stringified_diction);
+                    const data={
+                        Dictionary:dictionary_sites,
+                        OffsetM1:offsetM1,
+                        HeightM1:heightM1,
+                        OffsetM2:offsetM2,
+                        HeightM2:heightM2,
+                        OffsetV1V2:offsetV1V2,
+                        HeightV1V2:heightV1V2
+                    }
+                    alert(JSON.stringify(data,null, 2));
+                    console.log(data);
+                    fetch('/generate_gds_mesh', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)  // Send the data as JSON
+                    })
+                    .then(response => response.json())  // Wait for the server response
+                    .then(data => {
+                        // Once the data is processed, redirect to the custom page
+                        window.location.href = '/mesh'; 
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('There was an error processing your request. Please try again.');
+                    });
+            }
+        </script>
+        <script>
+            //This is what we can use to pass to the python file, Most likely I will need to create a new one for the gds upload
+            var offsetM1;
+            var heightM1;
+            var offsetM2;
+            var heightM2;
+            var offsetV1V2;
+            var heightV1V2;
+            document.getElementById('generateMesh').addEventListener('click', function() {
+            // Get all the input elements
+                offsetM1 = document.getElementById('offsetM1').value;
+                heightM1 = document.getElementById('height1').value;
+                offsetM2 = document.getElementById('offsetM2').value;
+                heightM2 = document.getElementById('heightM2').value;
+                offsetV1V2 = document.getElementById('offsetV1V2').value;
+                heightV1V2 = document.getElementById('heightV1V2').value;
+                
+                // Check if any of the fields are empty
+                if (offsetM1 && heightM1 && offsetM2 && heightM2 && offsetV1V2 && heightV1V2) {
+                    // If all fields have values, you can proceed with your mesh generation
+                    alert('All fields are filled. Generating mesh...');
+                    generateGDSMesh();
+                } else {
+                    // If any field is empty, display an error message
+                    alert('Please fill in all of the input fields before proceeding.');
+                }
+        });
+        document.querySelectorAll('.M input').forEach(input => {
+            input.addEventListener('input', function() {
+                // Get all input elements
+                const inputs = document.querySelectorAll('.M input');
+                
+                // Count how many inputs are filled
+                const filledCount = Array.from(inputs).filter(input => input.value.trim() !== "").length;
+
+                // Log the filled count for debugging
+                console.log(`Filled count = ${filledCount}`);
+                
+                // Check if all 6 inputs are filled
+                input_fields = filledCount === 6;
+
+                // Log the input_fields status (true or false)
+                console.log(`Input fields filled: ${input_fields}`);
+            });
+        });
+        function button_status(){
+            console.log(`Input Fields:${input_fields}`);
+            console.log(`Unique Sites:${ran_unique_site}`);
+            const generate_mesh=document.getElementById('generateMesh');
+            if(input_fields && ran_unique_site){
+                generate_mesh.disabled=false;
+                generate_mesh.classList.add('active');
+            }
+            else{
+                generate_mesh.classList.remove('active');
+                generate_mesh.disabled=true;
+            }
+        }
+        setInterval(button_status, 1000);
+        </script>
+   </body>
+</html>

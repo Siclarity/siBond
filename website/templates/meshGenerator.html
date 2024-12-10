@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Mesh Generator</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+        <style>
+            .topbar{
+                width:100%;
+                display:flex;
+                flex-direction: row;
+                background-color: #D9D9D9;
+                border-bottom:groove #000;
+                margin:0;
+            }
+            .topbar h1{
+                color: #000;
+                font-family: Inter;
+                font-size: 24px;
+                font-style: normal;
+                font-weight: 600;
+                line-height: normal;
+                text-align: right;
+                padding-left:50vw;
+            }
+            .topbar img{
+                width: 228px;
+                height: 52px; 
+                flex-shrink:0; 
+            }
+            .inner-body{
+                display:flex;
+                flex-direction: row;
+                width:100%;
+            }
+            body{
+                background-color: #D9D9D9;
+                width: 100vw;
+            }
+            .left-side-box{
+                display:flex;
+                flex-direction: column;
+                border-right:solid black;
+                padding-left: 1rem;
+                padding-right: 1rem;
+                width: 300px;
+                height: 90vh;
+            }
+            .whitespace{
+                background-color: white;
+                width:100vw;
+                height: 90vh;
+            }
+          .P{
+                display: inline-flex;
+                flex-direction: column;
+                height: 125px;
+                min-width: 300px;
+                align-items: flex-start;
+                flex-shrink: 0;
+                border:solid;
+                background-color: white;
+                border-radius: 5%;
+                font-family: Inter;
+                font-size: 24px;
+                font-style: normal;
+                font-weight: 300;
+                line-height: normal;
+                padding-left: 24px;
+                padding-right:24px;
+                padding-bottom:24px;
+            }
+            .header{
+                display:flex;
+                align-self: center;
+                justify-content: center;
+
+            }
+            .parameters_cd{
+                display:flex;
+                flex-direction: row;
+                justify-content:space-between;
+                padding-right: 1rem;
+                padding-left: 1rem;
+                /* width:90vw; */
+            
+            }
+            .parameters_over{
+                display:flex;
+                flex-direction: row;
+                justify-content:space-between;
+                padding-right: 1rem;
+                padding-left: 1rem;
+            }
+            .parameters_recess{
+                display:flex;
+                flex-direction: row;
+                justify-content:space-between;
+                padding-right: 1rem;
+                padding-left: 1rem;
+            }
+ 
+            .spacer{
+                padding-top: 1rem;
+                padding-bottom: 1rem;
+            }
+            .Die1_P{
+                display:flex;
+                flex-direction: row;
+                justify-content:space-between;
+                padding-right: 1rem;
+                padding-left: 1rem;
+            }
+            .Die2_P{
+                display:flex;
+                flex-direction: row;
+                justify-content:space-between;
+                padding-right: 1rem;
+                padding-left: 1rem;
+            }
+            /*Default border color will be gray*/
+            .neutral-border{
+                border-color: gray;
+            }
+            /* Green border if mesh is able to be generated */
+            .true-border {
+                border-color:#008000;
+            }
+
+            /* Red border if boolean is not able to be generated */
+            .false-border {
+                border-color: #cc2900;
+            }
+            /*If there is a conflict with 2 classes color them orange (warning)*/
+            .conflict-border{
+                border-color:#e6b800;
+            }
+            #submitButton {
+            background-color: gray;
+            color: white;
+            cursor: not-allowed;
+            }
+            #submitButton.active {
+                background-color: blue;
+                cursor: pointer;
+            }
+        </style>
+    </head>
+    <body>  
+        <div class="topbar">
+            <img src="/static/images/SiClarity-Logo.png" alt="SiClarity-Logo"/>
+            <h1>MELD</h1>
+        </div>
+        <div class="inner-body">
+            <div class="left-side-box">
+                <h1>Mesh Generator</h1>
+                <a href="/" ><button class="home_button"> Go Home</button></a>
+                <div class="spacer"></div>
+                <button class="button2" type="button" onclick="validateInputs()"> Validate your Parameters </button>
+                <div class="spacer"></div>
+                <button id="submitButton" disabled>Create your mesh</button>
+            </div>
+            <div class="whitespace">
+                <div class="header">
+                    <h2>Model Parameters</h2>
+                </div>
+                <div class="parameters">
+                    <div class="parameters_cd">
+                        <form class="P" id="CD">
+                            <h4>CD</h4>
+                            <input type="number" class="cd" id="cd" placeholder="Not implemented yet" name="cd">
+                        </form>
+                        <form class="P" id="CD var">
+                            <h4> CD variability</h4>
+                            <input type="number" class="cd_var" id="cd_var" placeholder="Not implemented yet" name="cd_var">
+                        </form>
+                        <form class="P" id="CD steps">
+                            <h4> CD Steps</h4>
+                            <input type="number" class="cd_step" id="cd_step" placeholder="Not implemented yet" name="cd_step">
+                        </form>
+                    </div>
+                    <div class="spacer"></div>
+                    <div class="parameters_over">
+                        <form class="P" id="overlay">
+                            <h4>Overlay [µm]</h4>
+                            <input type="number" class="overlay_x" id="overlay_x" placeholder="x offset default(0)" name="overlay_x">
+                            <input type="number" class="overlay_y" id="overlay_y" placeholder="y offset default(0)" name="overlay_y">
+                        </form>
+                        <form class="P" id="overlay var">
+                            <h4> Overlay variability</h4>
+                            <input type="number" class="overlay_var" id="overlay_var" placeholder="Not implemented yet" name="overlay_var">
+                        </form>
+                        <form class="P" id="overlay steps">
+                            <h4> Overlay Steps</h4>
+                            <input type="number" class="overlay_step" id="overlay_step" placeholder="Not implemented yet" name="overlay_step">
+                        </form>
+                    </div>
+                    <div class="spacer"></div>
+                    <div class="parameters_recess">
+                        <form class="P" id="Recess variable">
+                            <h4> Recess Variability</h4>
+                            <input type="number" class="recess_variability" id="recess_variability" placeholder="Not implemented yet" name="recess_variability">
+                        </form>
+                            <form class="P" id="Recess variation">
+                            <h4> Recess Variation</h4>
+                            <div class="dropdown" id="Recess Options">
+                                <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" id="dropdownMenuButton">Recess Shape</button>
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                  <li><button class="dropdown-item" type="button" onclick="updateDropdown('Ellipse')">Ellipse</button></li>
+                                  <li><button class="dropdown-item" type="button" onclick="updateDropdown('Square')">Square</button></li>
+                                  <li><button class="dropdown-item" type="button" onclick="updateDropdown('Sphere')">Sphere</button></li>
+                                </ul>
+                              </div>
+                        </form>
+                    </div>
+                    <div class="Die_text">
+                        <h2>Die 1 Parameters</h2>
+                    </div>
+                    <div class="Die1_P">
+                        <form class="P neutral-border" id="Top SiO2 Height">
+                            <h4>SiO2 Height [µm]</h4>
+                            <input type="number" class="sio2h1" id="sio2h1" placeholder="10" name="sio2h1" min="0.1" step="any">
+                        </form>
+                        <form class="P neutral-border" id="Top SiO2 Width">
+                            <h4>SiO2 Width [µm]</h4>
+                            <input type="number" class="sio2w1" id="sio2w1" placeholder="10" name="sio2w1" min="0.1" step="any">
+                        </form>
+                        <form class="P neutral-border" id="Top SiO2 Depth">
+                            <h4>SiO2 Depth [µm]</h4>
+                            <input type="number" class="sio2d1" id="sio2d1" placeholder="15" name="sio2d1" min="0.1" step="any">
+                        </form>
+                        <form class="P neutral-border" id="Top Copper Radius">
+                            <h4>Copper Radius [µm]</h4>
+                            <input type="number" class="cr1" id="cr1" placeholder="2" name="cr1" min="0.1" step="any">
+                        </form>
+                        <form class="P neutral-border" id="Top Copper Height">
+                            <h4>Copper Height [µm]</h4>
+                            <input type="number" class="ch1" id="ch1" placeholder="10" name="ch1" min="0.1" step="any">
+                        </form>
+                        <form class="P neutral-border" id="Top Copper Recess">
+                            <h4>Copper Recess [nm]</h4>
+                            <input type="number" class="cd1" id="cd1" placeholder="4" name="cd1" min="0" step="any">
+                        </form>
+                    </div>
+                    <div class="Die_text">
+                        <h2>Die 2 Parameters</h2>
+                    </div>
+                    <div class="Die2_P">
+                        <form class="P neutral-border" id="Bot SiO2 Height">
+                            <h4>SiO2 Height [µm]</h4>
+                            <input type="number" class="sio2h2" id="sio2h2" placeholder="10" name="sio2h2" min="0.1" step="any">
+                        </form>
+                        <form class="P neutral-border"  id="Bot SiO2 Width">
+                            <h4>SiO2 Width [µm]</h4>
+                            <input type="number" class="sio2w2" id="sio2w2" placeholder="10" name="sio2w2" min="0.1" step="any">
+                        </form>
+                        <form class="P neutral-border" id="Bot SiO2 Depth">
+                            <h4>SiO2 Depth [µm]</h4>
+                            <input type="number"  class="sio2d2" id="sio2d2" placeholder="15" name="sio2d2" min="0.1" step="any">
+                        </form>
+                        <form class="P neutral-border" id="Bot Copper Radius">
+                            <h4>Copper Radius [µm]</h4>
+                            <input type="number"  class="cr2" id="cr2" placeholder="2" name="cr2" min="0.1" step="any">
+                        </form>
+                        <form class="P neutral-border" id="Bot Copper Height">
+                            <h4>Copper Height [µm]</h4>
+                            <input type="number" class="ch2" id="ch2" placeholder="10" name="ch2" min="0.1" step="any">
+                        </form>
+                        <form class="P neutral-border" id="Bot Copper Recess">
+                            <h4>Copper Recess [nm]</h4>
+                            <input type="number"  class="cd2" id="cd2" placeholder="4" name="cd2" min="0" step="any">
+                        </form>
+                    </div>
+
+            </div>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+        <script>
+            var sio2h1=''
+            var sio2w1=''
+            var sio2d1=''
+            var cr1=''
+            var ch1=''
+            var cd1=''
+            var sio2h2=''
+            var sio2w2=''
+            var sio2d2=''
+            var cr2=''
+            var ch2=''
+            var cd2=''
+            var recess_shape=''
+            var ox=''
+            var oy=''
+            function updateDropdown(choice) {
+                // Find the dropdown button by its ID
+                var dropdownButton = document.getElementById('dropdownMenuButton');
+                
+                // Update the button text with the selected choice
+                dropdownButton.textContent = choice;
+                recess_shape=choice;
+                console.log(`Recess Shape ${recess_shape}`);
+            }
+
+            function validateInputs(){
+                const topSiO2h=sio2h1;
+                const topSiO2w=sio2w1;
+                const topSiO2d=sio2d1;
+                const topCur=cr1;
+                const topCuh=ch1;
+                const topCu_recess=cd1;
+                const botSiO2h=sio2h2;
+                const botSiO2w=sio2w2;
+                const botSiO2d=sio2d2;
+                const botCur=cr2;
+                const botCuh=ch2;
+                const botCu_recess=cd2;
+                const r_shape=recess_shape.toLowerCase();
+                const over_x=ox;
+                const over_y=oy;
+                var top_conflict_r=false;
+                var top_conflict_h=false;
+                var bot_conflict_r=false;
+                var bot_conflict_h=false;
+                var tsh=false;
+                var tsw=false;
+                var tsd=false;
+                var tcr=false;
+                var tcd=false;
+                var trecess=false;
+                var bsh=false;
+                var bsw=false;
+                var bsd=false;
+                var bcr=false;
+                var bcd=false;
+                var brecess=false;
+                
+            
+                const a= document.getElementById('Top SiO2 Height');
+                const b= document.getElementById('Top SiO2 Width');
+                const c= document.getElementById('Top SiO2 Depth');
+                const d= document.getElementById('Top Copper Radius');
+                const e= document.getElementById('Top Copper Height');
+                const f= document.getElementById('Top Copper Recess');
+
+                const g= document.getElementById('Bot SiO2 Height');
+                const h= document.getElementById('Bot SiO2 Width');
+                const i= document.getElementById('Bot SiO2 Depth');
+                const j= document.getElementById('Bot Copper Radius');
+                const k= document.getElementById('Bot Copper Height');
+                const l= document.getElementById('Bot Copper Recess');
+
+                const m=document.getElementById("Recess variation");
+                const n=document.getElementById("overlay");
+                var recess_opt=false;
+                var overlay=false;
+                if(topSiO2h <= 0 || topSiO2h==''){
+                    a.classList.remove('neutral-border');
+                    a.classList.remove('true-border');
+                    a.classList.remove('conflict-border');
+                    a.classList.add('false-border');
+                }
+                else if(topSiO2h< 2*topCur){
+                    a.classList.remove('neutral-border');
+                    a.classList.remove('false-border');
+                    a.classList.remove('true-border');
+                    a.classList.add('conflict-border');
+                    top_conflict_r=true;
+                }
+                else{
+                    a.classList.remove('neutral-border');
+                    a.classList.remove('false-border');
+                    a.classList.remove('conflict-border');
+                    a.classList.add('true-border');
+                    tsh=true;
+                }
+                if(topSiO2w <= 0 || topSiO2w==''){
+                    b.classList.remove('neutral-border');
+                    b.classList.remove('true-border');
+                    b.classList.remove('conflict-border');
+                    b.classList.add('false-border');
+                }
+                else if(topSiO2w< 2*topCur){
+                    b.classList.remove('neutral-border');
+                    b.classList.remove('false-border');
+                    b.classList.remove('true-border');
+                    b.classList.add('conflict-border');
+                    top_conflict_r=true;
+                }
+                else{
+                    b.classList.remove('neutral-border');
+                    b.classList.remove('false-border');
+                    b.classList.remove('conflict-border');
+                    b.classList.add('true-border');
+                    tsw=true;
+                }
+                if(topSiO2d <= 0 || topSiO2d==''){
+                    c.classList.remove('neutral-border');
+                    c.classList.remove('true-border');
+                    c.classList.remove('conflict-border');
+                    c.classList.add('false-border');
+                }
+                else if(topSiO2d-0.2 < topCuh){
+                    c.classList.remove('neutral-border');
+                    c.classList.remove('true-border');
+                    c.classList.remove('false-border');
+                    c.classList.add('conflict-border');
+                    top_conflict_h=true;
+                }
+                else{
+                    c.classList.remove('neutral-border');
+                    c.classList.remove('false-border');
+                    c.classList.remove('conflict-border');
+                    c.classList.add('true-border');
+                    tsd=true;
+                }
+                if(topCur<=0||topCur==''){
+                    d.classList.remove('neutral-border');
+                    d.classList.remove('true-border');
+                    d.classList.remove('conflict-border');
+                    d.classList.add('false-border');
+                }
+                else if(top_conflict_r){
+                    d.classList.remove('neutral-border');
+                    d.classList.remove('true-border');
+                    d.classList.remove('false-border');
+                    d.classList.add('conflict-border'); 
+                }
+                else{
+                    d.classList.remove('neutral-border');
+                    d.classList.remove('false-border');
+                    d.classList.remove('conflict-border');
+                    d.classList.add('true-border');
+                    tcr=true;
+                }
+                if(topCuh<=0||topCuh==''){
+                    e.classList.remove('neutral-border');
+                    e.classList.remove('true-border');
+                    e.classList.remove('conflict-border');
+                    e.classList.add('false-border');
+                }
+                else if(top_conflict_h){
+                    e.classList.remove('neutral-border');
+                    e.classList.remove('true-border');
+                    e.classList.remove('false-border');
+                    e.classList.add('conflict-border'); 
+                }
+                else{
+                    e.classList.remove('neutral-border');
+                    e.classList.remove('false-border');
+                    e.classList.remove('conflict-border');
+                    e.classList.add('true-border');
+                    tcd=true;
+                }
+                if(topCu_recess<0 || topCu_recess==''){
+                    f.classList.remove('neutral-border');
+                    f.classList.remove('true-border');
+                    f.classList.remove('conflict-border');
+                    f.classList.add('false-border');
+                }
+                else if(topCu_recess/1000>=topCuh){
+                    f.classList.remove('neutral-border');
+                    f.classList.remove('true-border');
+                    f.classList.remove('false-border');
+                    f.classList.add('conflict-border')
+                }
+                else{
+                    f.classList.remove('neutral-border');
+                    f.classList.remove('false-border');
+                    f.classList.remove('conflict-border');
+                    f.classList.add('true-border');
+                    trecess=true;
+                }
+                if(botSiO2h <= 0 || botSiO2h==''){
+                    g.classList.remove('neutral-border');
+                    g.classList.remove('true-border');
+                    g.classList.remove('conflict-border');
+                    g.classList.add('false-border');
+                }
+                else if(botSiO2h< 2*botCur){
+                    g.classList.remove('neutral-border');
+                    g.classList.remove('false-border');
+                    g.classList.remove('true-border');
+                    g.classList.add('conflict-border');
+                    bot_conflict_r=true;
+                }
+                else{
+                    g.classList.remove('neutral-border');
+                    g.classList.remove('false-border');
+                    g.classList.remove('conflict-border');
+                    g.classList.add('true-border');
+                    bsh=true;
+                }
+                if(botSiO2w <= 0 || botSiO2w==''){
+                    h.classList.remove('neutral-border');
+                    h.classList.remove('true-border');
+                    h.classList.remove('conflict-border');
+                    h.classList.add('false-border');
+                }
+                else if(botSiO2w< 2*botCur){
+                    h.classList.remove('neutral-border');
+                    h.classList.remove('false-border');
+                    h.classList.remove('true-border');
+                    h.classList.add('conflict-border');
+                    bot_conflict_r=true;
+                }
+                else{
+                    h.classList.remove('neutral-border');
+                    h.classList.remove('false-border');
+                    h.classList.remove('conflict-border');
+                    h.classList.add('true-border');
+                    bsw=true;
+                }
+                if(botSiO2d <= 0 || botSiO2d==''){
+                    i.classList.remove('neutral-border');
+                    i.classList.remove('true-border');
+                    i.classList.remove('conflict-border');
+                    i.classList.add('false-border');
+                }
+                else if(botSiO2d-0.2 < botCuh){
+                    i.classList.remove('neutral-border');
+                    i.classList.remove('true-border');
+                    i.classList.remove('false-border');
+                    i.classList.add('conflict-border');
+                    bot_conflict_h=true;
+                }
+                else{
+                    i.classList.remove('neutral-border');
+                    i.classList.remove('false-border');
+                    i.classList.remove('conflict-border');
+                    i.classList.add('true-border');
+                    bsd=true;
+                }
+                if(botCur<=0 ||botCur==''){
+                    j.classList.remove('neutral-border');
+                    j.classList.remove('true-border');
+                    j.classList.remove('conflict-border');
+                    j.classList.add('false-border');
+                }
+                else if(bot_conflict_r){
+                    j.classList.remove('neutral-border');
+                    j.classList.remove('true-border');
+                    j.classList.remove('false-border');
+                    j.classList.add('conflict-border'); 
+                }
+                else{
+                    j.classList.remove('neutral-border');
+                    j.classList.remove('false-border');
+                    j.classList.remove('conflict-border');
+                    j.classList.add('true-border');
+                    bcr=true;
+                }
+                if(botCuh<=0||botCuh==''){
+                    k.classList.remove('neutral-border');
+                    k.classList.remove('true-border');
+                    k.classList.remove('conflict-border');
+                    k.classList.add('false-border');
+                }
+                else if(bot_conflict_h){
+                    k.classList.remove('neutral-border');
+                    k.classList.remove('true-border');
+                    k.classList.remove('false-border');
+                    k.classList.add('conflict-border'); 
+                }
+                else{
+                    k.classList.remove('neutral-border');
+                    k.classList.remove('false-border');
+                    k.classList.remove('conflict-border');
+                    k.classList.add('true-border');
+                    bcd=true;
+                }
+                if(botCu_recess<0||botCu_recess==''){
+                    l.classList.remove('neutral-border');
+                    l.classList.remove('true-border');
+                    l.classList.remove('conflict-border');
+                    l.classList.add('false-border');
+                }
+                else if(botCu_recess/1000>=botCuh){
+                    l.classList.remove('neutral-border');
+                    l.classList.remove('true-border');
+                    l.classList.remove('false-border');
+                    l.classList.add('conflict-border')
+                }
+                else{
+                    l.classList.remove('neutral-border');
+                    l.classList.remove('false-border');
+                    l.classList.remove('conflict-border');
+                    l.classList.add('true-border');
+                    brecess=true;
+                }
+                if(r_shape==''){
+                    m.classList.remove('neutral-border');
+                    m.classList.remove('true-border');
+                    m.classList.remove('conflict-border');
+                    m.classList.add('false-border');
+                    recess_opt=false;
+                }
+                else{
+                    m.classList.remove('neutral-border');
+                    m.classList.remove('false-border');
+                    m.classList.remove('conflict-border');
+                    m.classList.add('true-border');
+                    recess_opt=true;
+                }
+                if((Math.abs(ox)>=(topCur*0.5)&& Math.abs(oy)>=(0.5*topCur)) ||(Math.abs(ox)>=(botCur*0.5)&& Math.abs(oy)>=(0.5*botCur))){
+                    n.classList.remove('neutral-border');
+                    n.classList.remove('true-border');
+                    n.classList.remove('conflict-border');
+                    n.classList.add('false-border');
+                    overlay=false;
+                }
+                else if((Math.abs(ox)<=(topCur*0.5)&&Math.abs(oy)>=(0.5*topCur)) ||(Math.abs(ox)>=(topCur*0.5)&&Math.abs(oy)<=(0.5*topCur))||(Math.abs(ox)<=(botCur*0.5)&&Math.abs(oy)>=(0.5*botCur)) ||(Math.abs(ox)>=(botCur*0.5)&&Math.abs(oy)<=(0.5*topCur))){
+                    n.classList.remove('neutral-border');
+                    n.classList.remove('true-border');
+                    n.classList.remove('false-border');
+                    n.classList.add('conflict-border');
+                    overlay=false;
+                }
+                else{
+                    n.classList.remove('neutral-border');
+                    n.classList.remove('false-border');
+                    n.classList.remove('conflict-border');
+                    n.classList.add('true-border');
+                    overlay=true;
+                }
+                const top_valid=(tsw&&tsh&&tsd&&tcr&&tcd);
+                const bot_valid=(bsw&&bsh&&bsd&&bcr&&bcd);
+                const bot_cop_valid=(bot_conflict_h || bot_conflict_r||(!trecess));
+                const top_cop_valid=(top_conflict_h||top_conflict_r ||(!brecess));
+                const submitButton=document.getElementById('submitButton');
+                if(top_valid && bot_valid && !bot_cop_valid &&!top_cop_valid &&recess_opt &&overlay){
+                    console.log(`Can generate the mesh`);
+                    submitButton.disabled=false;
+                    submitButton.classList.add('active');
+                }
+                if(!top_valid){
+                    console.log(`Issue with top mesh inputs`);
+                    console.log(`${tsh}`);
+                    console.log(`${tsw}`);
+                    console.log(`${tsd}`);
+                    console.log(`${tcr}`);
+                    console.log(`${tcd}`);
+                    submitButton.disabled=true;
+                }
+                if(!bot_valid){
+                    console.log(`Issue with bottom mesh inputs`);
+                    submitButton.disabled=true;
+                    submitButton.classList.remove('active');
+                }
+                if(top_cop_valid){
+                    console.log(`Issue with the top copper dimensions`);
+                    submitButton.disabled=true;
+                    submitButton.classList.remove('active');
+                }
+                if(bot_cop_valid){
+                    console.log(`Issue with the bottom copper dimensions`);
+                    submitButton.disabled=true;
+                    submitButton.classList.remove('active');
+                }
+                if(!recess_opt){
+                    console.log(`Issue with the recess option`);
+                    submitButton.disabled=true;
+                    submitButton.classList.remove('active');
+                }
+                if(!recess_opt){
+                    console.log(`Issue with the ovelay options`);
+                    submitButton.disabled=true;
+                    submitButton.classList.remove('active');
+                }
+                console.log(`${r_shape}`); 
+
+            }
+            
+            document.getElementById('submitButton').addEventListener('click', function() {
+                if (!this.disabled) {
+                    alert("Form submitted!");
+                    let topSiO2={
+                        SiO2h:sio2h1,
+                        SiO2w:sio2w1,
+                        SiO2l:sio2d1,
+                        CopperR:cr1,
+                        CopperH:ch1,
+                        RecessShape:recess_shape,
+                        Recess:cd1
+                    }
+                    let botSiO2={
+                        SiO2h:sio2h2,
+                        SiO2w:sio2w2,
+                        SiO2l:sio2d2,
+                        CopperR:cr2,
+                        CopperH:ch2,
+                        RecessShape:recess_shape,
+                        Recess:cd2
+                    }
+                    let data={
+                        TSiO2h:sio2h1,
+                        TSiO2w:sio2w1,
+                        TSiO2l:sio2d1,
+                        TCopperR:cr1,
+                        TCopperH:ch1,
+                        TRecessShape:recess_shape,
+                        TRecess:cd1,
+                        BSiO2h:sio2h2,
+                        BSiO2w:sio2w2,
+                        BSiO2l:sio2d2,
+                        BCopperR:cr2,
+                        BCopperH:ch2,
+                        BRecessShape:recess_shape,
+                        BRecess:cd2,
+                        O_x:ox,
+                        O_y:oy
+
+                    }
+                    alert(JSON.stringify(topSiO2,null, 2));
+                    alert(JSON.stringify(botSiO2,null, 2));
+                    fetch('/generate_gds_mesh', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)  // Send the data as JSON
+                    })
+                    .then(response => response.json())  // Wait for the server response
+                    .then(data => {
+                        // Once the data is processed, redirect to the custom page
+                        window.location.href = '/mesh'; 
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('There was an error processing your request. Please try again.');
+                    });
+            }
+        });
+            document.body.addEventListener('input', function(e) {
+                // Ensure the event target is a number input
+                const submitButton=document.getElementById('submitButton');
+                submitButton.disabled=true;
+                submitButton.classList.remove('active');
+                if (e.target.tagName.toLowerCase() === 'input' && e.target.type === 'number') {
+                    
+                    // Get the form the input belongs to
+                    const form = e.target.closest('form');
+                    
+                    if (form) {
+                        const formId = form.id; // Form ID to identify which form triggered the change
+                        const inputValue = e.target.value; // Get the new input value as a float
+
+                        // Update variables and output based on form ID and input value
+                        switch (formId) {
+                            case 'Top SiO2 Height':
+                                sio2h1 = inputValue; 
+                                console.log(`Top SiO2 Height: ${sio2h1}`); 
+                                break;
+                            case 'Top SiO2 Width':
+                                sio2w1 = inputValue; 
+                                console.log(`Top SiO2 Width: ${sio2w1}`); 
+                                break;
+                            case 'Top SiO2 Depth':
+                                sio2d1 = inputValue; 
+                                console.log(`Top SiO2 Depth: ${sio2d1}`);  
+                                break;
+                        
+                            case 'Top Copper Radius':
+                                cr1 = inputValue; 
+                                console.log(`Top Copper Radius: ${cr1}`);  
+                                break;
+                            case 'Top Copper Height':
+                                ch1 = inputValue; 
+                                console.log(`Top Copper Height: ${ch1}`);  
+                                break; 
+                            case 'Top Copper Recess':
+                                cd1 = inputValue; 
+                                console.log(`Top Copper Recess: ${cd1}`);  
+                                break;
+                            case 'Bot SiO2 Height':
+                                sio2h2 = inputValue; 
+                                console.log(`Bot SiO2 Height: ${sio2h2}`); 
+                                break;
+                            case 'Bot SiO2 Width':
+                                sio2w2 = inputValue; 
+                                console.log(`Bot SiO2 Width: ${sio2w2}`); 
+                                break;
+                            case 'Bot SiO2 Depth':
+                                sio2d2 = inputValue; 
+                                console.log(`Bot SiO2 Depth: ${sio2d2}`);  
+                                break;
+                        
+                            case 'Bot Copper Radius':
+                                cr2 = inputValue; 
+                                console.log(`Bot Copper Radius: ${cr2}`);  
+                                break;
+                            case 'Bot Copper Height':
+                                ch2 = inputValue; 
+                                console.log(`Bot Copper Height: ${ch2}`);  
+                                break; 
+                            case 'Bot Copper Recess':
+                                cd2 = inputValue; 
+                                console.log(`Bot Copper Recess: ${cd2}`);  
+                                break;
+                            case 'overlay':
+                                ox=document.getElementById('overlay_x').value
+                                oy=document.getElementById('overlay_y').value
+                                console.log(`Overlay X ${ox} Overlay y ${oy}`)
+                                break;
+                            // Add cases for additional forms as integration of other inputs progress
+                            default:
+                                break;
+                        }
+                    }
+                }
+            });
+
+        </script>
+    </body>
+</html>
