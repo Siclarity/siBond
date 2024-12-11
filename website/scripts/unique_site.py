@@ -68,10 +68,10 @@ def unique_pictures(gds_files_path, diction, layer, width=1000, height=1000):
         # print(f"Object1 bounds:{object_bound1}, Object2 bounds:{object_bound2}")
         #This was previously x1=max(a1,b1), y1=max(a2,b2), x2=min(a3,b3),y2=min(a4,b4)
         #Need to figure out a better zoom mechanism as this seems to be too wide
-        x1=min(a1,b1)
-        y1=min(a2,b2)
-        x2=max(a3,b3)
-        y2=max(a4,b4)
+        x1=max(a1,b1)
+        y1=max(a2,b2)
+        x2=min(a3,b3)
+        y2=min(a4,b4)
         # print(f'X1:{x1}')
         # print(f'Y1:{y1}')
         # print(f'X2:{x2}')
@@ -86,7 +86,7 @@ def unique_pictures(gds_files_path, diction, layer, width=1000, height=1000):
         # print(f'Y1:{y1}')
         # print(f'X2:{x2}')
         # print(f'Y2:{y2}')
-        scale_factor=0.01
+        scale_factor=0.5
         # print(f'Scale Factor:{scale_factor}')
         box_width = (x2 - x1) * scale_factor
         box_height = (y2 - y1) * scale_factor

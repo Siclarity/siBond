@@ -3,6 +3,7 @@ from os import listdir, system, makedirs, getcwd, path, remove
 from os.path import isfile, join, isdir, exists
 from scripts.thumbnails import gds_to_image_klayout
 from scripts.get_layers import retrieve_layers
+from scripts.mesh_Flask_gen import create_mesh
 import shutil
 import pya
 from scripts.bondSearch_Flask import search
@@ -11,6 +12,7 @@ from scripts.layer_modifier import mod_layers
 from json import dumps, dump
 import json
 import subprocess
+
 # from mesh_Flask_gen import *
 app = Flask(__name__)
 
@@ -275,8 +277,12 @@ def temp():
     if request.method == 'POST':
         try:
             data = request.get_json()  # gets the JSON
+            print(type(data))
             print(f'Data Received: {data}')
-            return render_template('mesh.html', data=data)
+            mesh_sites=create_mesh(data)
+            print(f'Sending to mesh page:{mesh_sites}')
+            print(type(mesh_sites))
+            return render_template('mesh.html', mesh_sites=mesh_sites)
         except Exception as e:
             print(f'Error parsing JSON: {e}')
             return "Error parsing JSON", 400  # Send a proper error response
