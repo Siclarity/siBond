@@ -83,7 +83,7 @@ def calculate_areas(shape1,shape2,shape1_type,shape2_type):
 #filename="CLIP.gds"
 filename="Test.gds"
 #filename="displacement.gds"
-def search(filename):
+def search(filename, layer):
     if(filename.lower().endswith('.gds')):
         rtree = index.Index()
         ly = pya.Layout()
@@ -92,8 +92,10 @@ def search(filename):
         #print(f"Viewer contains {(view.current_layer_list)} layers.")
         top_cell = ly.top_cell()
         top_cell.flatten(-1,True)
-        layer1 = ly.layer(110, 0)
-        layer2 = ly.layer(11, 0)
+        layer1 = ly.layer((layer[0]))
+        layer2 = ly.layer((layer[1]))
+        print(layer1)
+        print(layer2)
         layer3 = ly.layer(4,0) #intersection layer will be added
         shapes1 = []
         start_time=datetime.now()

@@ -122,15 +122,36 @@ def getFile():
     #return render_template('gds.html')
         #return jsonify({"success": False})
 
-@app.route('/search')
+@app.route('/search', methods=["POST"])
 def search_sites():
+    
+    selected_layers = request.json.get('layers', [])
+    print("Selected layers:", selected_layers)
+    # Ensure selected_layers is a list of dictionaries
+    if isinstance(selected_layers, list):
+        # Log each element of selected_layers to verify the structure
+        for i, layer in enumerate(selected_layers):
+            print(f"Layer {i}: {layer}")
+    else:
+        print("Selected layers is not a list")
+    # Convert selected layers into a list of tuples (layer, datatype)
+    try:
+        visible_layer = [
+            (int(layer.split('-')[0]), int(layer.split('-')[1]))  # Split on '-' and convert to integers
+            for layer in selected_layers
+        ]
+        print(f"Formatted visible layers: {visible_layer}")
+        visible_layer_str = str(visible_layer)
+        print(f"Stringified visible layers: {visible_layer_str}")
+    except Exception as e:
+        print("Error while formatting visible layers:", e)
     files_in_folder = listdir(app.config['Uploaded_GDS'])
     # Find the .gds file in the folder
     gds_filename = None
     for filename in files_in_folder:
         if filename.endswith('.gds'):
             gds_filename=f"uploads/{filename}"
-            c=search(gds_filename)
+            c=search(gds_filename, visible_layer)
             #print(f'C:{c}')
             print(type(c))
             # diction_serialized=dumps(c)
@@ -143,13 +164,14 @@ def search_sites():
             print("Entering Unique_site")
             #print(f"Arguments passed:\n gds_folder={cwd}\\uploads \n diction={diction_serialized}")
 
-            cm=f'C:\\Users\\aneal\\AppData\\Roaming\\KLayout\\klayout_app.exe -z -r {cwd}/scripts/unique_site.py  -rd gds_folder={cwd}\\uploads  -rd diction={cwd}\\information.json"'
+            cm=f'C:\\Users\\aneal\\AppData\\Roaming\\KLayout\\klayout_app.exe -z -r {cwd}/scripts/unique_site.py  -rd gds_folder={cwd}\\uploads  -rd diction={cwd}\\information.json -rd layer="{visible_layer_str}"'
             #print(f"CM:{cm}")
             # test=system(cm)
             result=subprocess.run(cm,shell=True,capture_output=True,text=True)
             print(f"Output: {result.stdout}")
             print(f"Error: {result.stderr}")
             print(f"Exiting Unique_Site:{result.returncode}")
+    print(c)
     return jsonify({"Result":c})
 
 
@@ -238,23 +260,28 @@ def update_thumbnail():
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
-@app.route('/generate_gds_mesh', methods=['POST'])
-def meshGenerate_gds():
-    data = request.json  # Get the incoming JSON data from the client
-    print("Received data:", data)
-    #writing the data that the user inputs and the backend data to a file which can be used for the python code, this file can be used for the new mesh python file
-    with open("bonding_sites.json","w") as outfile:
-        dump(data,outfile)
-    # Return a response (you can return results if needed, or just a success message)
-    return jsonify({'message': 'Success'})  # This will then forward the user to the meshGDS page
+# @app.route('/generate_gds_mesh', methods=['POST'])
+# def meshGenerate_gds():
+#     data = request.json  # Get the incoming JSON data from the client
+#     print("Received data:", data)
+#     #writing the data that the user inputs and the backend data to a file which can be used for the python code, this file can be used for the new mesh python file
+#     with open("bonding_sites.json","w") as outfile:
+#         dump(data,outfile)
+#     # Return a response (you can return results if needed, or just a success message)
+#     return jsonify({'message': 'Success'})  # This will then forward the user to the meshGDS page
 
 @app.route('/mesh',methods=["GET","POST"])
 def temp():
-    if request.method=='GET':
-        return render_template('mesh.html')
+    if request.method == 'POST':
+        try:
+            data = request.get_json()  # gets the JSON
+            print(f'Data Received: {data}')
+            return render_template('mesh.html', data=data)
+        except Exception as e:
+            print(f'Error parsing JSON: {e}')
+            return "Error parsing JSON", 400  # Send a proper error response
     else:
-        return  "Not yet"
-
+        return render_template('mesh.html')
 @app.route('/meshGenerator')
 def meshGenerator():
         return render_template('meshGenerator.html')

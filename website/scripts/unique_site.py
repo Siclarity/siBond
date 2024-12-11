@@ -18,7 +18,7 @@ def convert_to_dict_and_keys(input_dict):
     return input_dict
 #Write diction to a JSON file 
 #Diction can then be read from JSON file
-def unique_pictures(gds_files_path, diction, layer_properties, width=1000, height=1000):
+def unique_pictures(gds_files_path, diction, layer, width=1000, height=1000):
     print("In Unique pictures")
     print(f'GDS Fp:{gds_files_path}')
     with open(diction,'r') as file:
@@ -26,7 +26,8 @@ def unique_pictures(gds_files_path, diction, layer_properties, width=1000, heigh
     #print(values)
     #print(f"Diction:{values}")
     # print("In unique sites")
-    visible_layer=[(11,0),(110,0)]
+    # visible_layer=[(11,0),(110,0)]
+    visible_layer=ast.literal_eval(layer)
     folderpath='images'
     app = pya.Application.instance()
     mw = app.main_window()
@@ -153,4 +154,4 @@ def unique_pictures(gds_files_path, diction, layer_properties, width=1000, heigh
 
 if __name__ == '__main__':
     #global gds_folder,diction,layer_properties
-    unique_pictures(gds_folder,diction,None)
+    unique_pictures(gds_folder,diction,layer)

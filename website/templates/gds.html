@@ -294,21 +294,40 @@
             function IdentifyUniqueBondingSites() {
                 const but_search = document.getElementById("bondSearch");
                 but_search.disabled=true;
-                // Get the new image source from the server
-                fetch('/search')  // Make a GET request to /h to get the updated image filename
+                const selectedLayers = [];
+                const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+
+                checkboxes.forEach(checkbox => {
+                    selectedLayers.push(checkbox.value);  // Get the value of each checked checkbox
+                });
+                if (selectedLayers.length !== 2) {
+                    alert("Please select exactly 2 layers to identify unique bondsites.");
+                    but_search.disabled=false; 
+                    return;  // Exit the function if not exactly 2 checkboxes are selected
+                }
+
+
+                // Transforms the seleected layers to be in JSON format for front end  
+                const requestData = {
+                    layers: selectedLayers  // Array of selected checkbox values
+                };
+
+                fetch('/search', {  // Make a POST request
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ layers: selectedLayers })
+                })
                 .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Network response was not ok');
-                        }
-                        
                     return response.json();  // Parse the response body as JSON
-                    })
+                })
                 .then(data => {
                         // Handle the response data
                         //alert("Success: " + JSON.stringify(data));
-                        dictionary_sites=data.Result.List_of_unique_bonding_site
-                        console.log(data.Result)
-                        console.log(dictionary_sites)
+                        dictionary_sites=data.Result.List_of_unique_bonding_site;
+                        console.log(data.Result);
+                        console.log(dictionary_sites);
                         let unique_site=document.querySelector(".unique_site");
                         if(!unique_site){
                             unique_site= document.createElement("DIV");
@@ -336,7 +355,12 @@
                         document.getElementById("Information").appendChild(FM);
                         ran_unique_site=true;
                     })
-                }
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                    alert('There was an error processing your request.');
+                });
+            }
+                
         </script>
 
         <script>
@@ -641,23 +665,20 @@
                     }
                     alert(JSON.stringify(data,null, 2));
                     console.log(data);
-                    fetch('/generate_gds_mesh', {
+                    fetch('/mesh', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
                         body: JSON.stringify(data)  // Send the data as JSON
                     })
-                    .then(response => response.json())  // Wait for the server response
-                    .then(data => {
-                        // Once the data is processed, redirect to the custom page
-                        window.location.href = '/mesh'; 
-                    })
                     .catch(error => {
                         console.error('Error:', error);
                         alert('There was an error processing your request. Please try again.');
+                        return;
                     });
-            }
+                    window.location.href = '/mesh';
+                }
         </script>
         <script>
             //This is what we can use to pass to the python file, Most likely I will need to create a new one for the gds upload

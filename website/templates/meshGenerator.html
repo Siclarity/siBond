@@ -360,7 +360,7 @@
                     a.classList.remove('conflict-border');
                     a.classList.add('false-border');
                 }
-                else if(topSiO2h< 2*topCur){
+                else if(topSiO2h<= 2*topCur){
                     a.classList.remove('neutral-border');
                     a.classList.remove('false-border');
                     a.classList.remove('true-border');
@@ -380,7 +380,7 @@
                     b.classList.remove('conflict-border');
                     b.classList.add('false-border');
                 }
-                else if(topSiO2w< 2*topCur){
+                else if(topSiO2w<= 2*topCur){
                     b.classList.remove('neutral-border');
                     b.classList.remove('false-border');
                     b.classList.remove('true-border');
@@ -477,7 +477,7 @@
                     g.classList.remove('conflict-border');
                     g.classList.add('false-border');
                 }
-                else if(botSiO2h< 2*botCur){
+                else if(botSiO2h<= 2*botCur){
                     g.classList.remove('neutral-border');
                     g.classList.remove('false-border');
                     g.classList.remove('true-border');
@@ -497,7 +497,7 @@
                     h.classList.remove('conflict-border');
                     h.classList.add('false-border');
                 }
-                else if(botSiO2w< 2*botCur){
+                else if(botSiO2w<= 2*botCur){
                     h.classList.remove('neutral-border');
                     h.classList.remove('false-border');
                     h.classList.remove('true-border');
@@ -713,24 +713,22 @@
                     }
                     alert(JSON.stringify(topSiO2,null, 2));
                     alert(JSON.stringify(botSiO2,null, 2));
-                    fetch('/generate_gds_mesh', {
+                    console.log(JSON.stringify(data));
+                    fetch('/mesh', {
                         method: 'POST',
                         headers: {
-                            'Content-Type': 'application/json'
+                            'Content-type': 'application/json'
                         },
                         body: JSON.stringify(data)  // Send the data as JSON
-                    })
-                    .then(response => response.json())  // Wait for the server response
-                    .then(data => {
-                        // Once the data is processed, redirect to the custom page
-                        window.location.href = '/mesh'; 
                     })
                     .catch(error => {
                         console.error('Error:', error);
                         alert('There was an error processing your request. Please try again.');
+                        return;
                     });
-            }
-        });
+                    window.location.href = '/mesh';
+                }
+            });
             document.body.addEventListener('input', function(e) {
                 // Ensure the event target is a number input
                 const submitButton=document.getElementById('submitButton');
