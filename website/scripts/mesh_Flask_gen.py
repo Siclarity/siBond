@@ -44,6 +44,8 @@ def create_mesh(JSON_st):
         number_of_meshes=len(Js_in_dict)
         gds=True
         print(f'{number_of_meshes} unique meshes')
+        dbUnit=Js_in['DBUnit']
+        print(dbUnit)
     else:
         print("From Create your own mesh")
         number_of_meshes=1
@@ -204,14 +206,14 @@ def create_mesh(JSON_st):
         # plot.add_mesh(TiN_top,color='black',opacity=0.5)
         # plot.add_mesh(Copper_top,color='yellow',opacity=1)
         # plot.show()
+        count+=1
         SiO2_bot.save(f'SiO2_bot{count}.vtk')
         TiN_bot.save(f'TiN_bot{count}.vtk')
         Copper_bot.save(f'Copper_bot{count}.vtk')
         SiO2_top.save(f'SiO2_top{count}.vtk')
         TiN_top.save(f'TiN_top{count}.vtk')
         Copper_top.save(f'Copper_top{count}.vtk')
-        count+=1
-        site_information[count]={"Top SiO2 Width":SiO2_w_top,"Top SiO2 Height:":SiO2_d_top,"Top SiO2 Depth:":SiO2_h_top,"Top Cu Radius":Cu_r_top,"Top Cu Height:":Cu_h_top, "Top Recess Value:":Cu_dish_top, "Bot SiO2 Width":SiO2_w_bot, "Bot SiO2 Height:":SiO2_d_bot,"Bot SiO2 Depth:":SiO2_h_bot,"Bot Cu Radius":Cu_r_bot,"Bot Cu Height:":Cu_h_bot, "Bot Recess Value:":Cu_dish_bot}
+        site_information[count]={"Top SiO2 Width":SiO2_w_top,"Top SiO2 Height":SiO2_d_top,"Top SiO2 Depth":SiO2_h_top,"Top Cu Radius":Cu_r_top,"Top Cu Height":Cu_h_top, "Top Recess Value":Cu_dish_top, "Bot SiO2 Width":SiO2_w_bot, "Bot SiO2 Height":SiO2_d_bot,"Bot SiO2 Depth":SiO2_h_bot,"Bot Cu Radius":Cu_r_bot,"Bot Cu Height":Cu_h_bot, "Bot Recess Value":Cu_dish_bot, "Offset X":offset_x,"Offset Y":offset_y}
     return site_information
 
 class Material:

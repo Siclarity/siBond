@@ -291,6 +291,7 @@
           
         <script>
             var dictionary_sites;
+            var dbUnits;
             function IdentifyUniqueBondingSites() {
                 const but_search = document.getElementById("bondSearch");
                 but_search.disabled=true;
@@ -328,6 +329,9 @@
                         dictionary_sites=data.Result.List_of_unique_bonding_site;
                         console.log(data.Result);
                         console.log(dictionary_sites);
+                        console.log(data)
+                        dbUnits=data.Units;
+                        console.log(dbUnits);
                         let unique_site=document.querySelector(".unique_site");
                         if(!unique_site){
                             unique_site= document.createElement("DIV");
@@ -657,24 +661,33 @@
                         OffsetM2:offsetM2,
                         HeightM2:heightM2,
                         OffsetV1V2:offsetV1V2,
-                        HeightV1V2:heightV1V2
+                        HeightV1V2:heightV1V2,
+                        DBUnit:dbUnits
                     }
                     alert(JSON.stringify(data,null, 2));
                     console.log(data);
-                    fetch('/mesh', {
+                    // Send data to the server for processing
+                    fetch('/generate_mesh_content', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
                         body: JSON.stringify(data)  // Send the data as JSON
                     })
+                    .then(response => response.json())  // Assuming the server responds with JSON data
+                    .then(processedData => {
+                        // Store the processed data in sessionStorage
+                        sessionStorage.setItem('mesh_sites', JSON.stringify(processedData));
+
+                        // Redirect to /mesh page
+                        window.location.href = '/mesh';
+                    })
                     .catch(error => {
                         console.error('Error:', error);
                         alert('There was an error processing your request. Please try again.');
-                        return;
                     });
-                    window.location.href = '/mesh';
-                }
+            }
+        
         </script>
         <script>
             //This is what we can use to pass to the python file, Most likely I will need to create a new one for the gds upload

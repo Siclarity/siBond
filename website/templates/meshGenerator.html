@@ -711,22 +711,26 @@
                         O_y:oy
 
                     }
-                    alert(JSON.stringify(topSiO2,null, 2));
-                    alert(JSON.stringify(botSiO2,null, 2));
-                    console.log(JSON.stringify(data));
-                    fetch('/mesh', {
+                    // Send data to the server for processing
+                    fetch('/generate_mesh_content', {
                         method: 'POST',
                         headers: {
-                            'Content-type': 'application/json'
+                            'Content-Type': 'application/json'
                         },
                         body: JSON.stringify(data)  // Send the data as JSON
+                    })
+                    .then(response => response.json())  // Assuming the server responds with JSON data
+                    .then(processedData => {
+                        // Store the processed data in sessionStorage
+                        sessionStorage.setItem('mesh_sites', JSON.stringify(processedData));
+
+                        // Redirect to /mesh page
+                        window.location.href = '/mesh';
                     })
                     .catch(error => {
                         console.error('Error:', error);
                         alert('There was an error processing your request. Please try again.');
-                        return;
                     });
-                    window.location.href = '/mesh';
                 }
             });
             document.body.addEventListener('input', function(e) {

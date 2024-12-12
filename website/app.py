@@ -1,4 +1,4 @@
-from flask import Flask,render_template,request,jsonify,send_from_directory
+from flask import Flask,render_template,request,jsonify,send_from_directory,redirect,url_for
 from os import listdir, system, makedirs, getcwd, path, remove
 from os.path import isfile, join, isdir, exists
 from scripts.thumbnails import gds_to_image_klayout
@@ -12,7 +12,7 @@ from scripts.layer_modifier import mod_layers
 from json import dumps, dump
 import json
 import subprocess
-
+import re
 # from mesh_Flask_gen import *
 app = Flask(__name__)
 
@@ -171,10 +171,14 @@ def search_sites():
             # test=system(cm)
             result=subprocess.run(cm,shell=True,capture_output=True,text=True)
             print(f"Output: {result.stdout}")
+            match = re.search(r'The DBU for the layout is:([0-9.-]+)', result.stdout)
+            if match:
+                unit=match.group(1)
+                print(f"DBU value is:{unit}")
             print(f"Error: {result.stderr}")
             print(f"Exiting Unique_Site:{result.returncode}")
     print(c)
-    return jsonify({"Result":c})
+    return jsonify({"Result":c,"Units":unit})
 
 
 @app.route('/scripts/images/<filename>')
@@ -262,33 +266,31 @@ def update_thumbnail():
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
-# @app.route('/generate_gds_mesh', methods=['POST'])
-# def meshGenerate_gds():
-#     data = request.json  # Get the incoming JSON data from the client
-#     print("Received data:", data)
-#     #writing the data that the user inputs and the backend data to a file which can be used for the python code, this file can be used for the new mesh python file
-#     with open("bonding_sites.json","w") as outfile:
-#         dump(data,outfile)
-#     # Return a response (you can return results if needed, or just a success message)
-#     return jsonify({'message': 'Success'})  # This will then forward the user to the meshGDS page
+@app.route('/generate_mesh_content', methods=['POST'])
+def meshGenerate():
+    try:
+        data = request.get_json() 
+        print(type(data))
+        print(f'Data Received: {data}')
+        mesh_sites = create_mesh(data) 
+        print(f'Storing in session: {mesh_sites}')
+        return jsonify(mesh_sites)
+    except Exception as e:
+        print(f'Error parsing data: {e}')
+        return "Error parsing the submitted data", 400 
 
-@app.route('/mesh',methods=["GET","POST"])
+# @app.route('/mesh', methods=["GET", "POST"])
+# def temp():
+#     if request.method == "GET":
+#         mesh_sites = request.args.get('mesh_sites')  # Retrieve 'mesh_sites' from query parameters
+#         print(f"Mesh Sites received: {mesh_sites}")  # You can print it or use it for debugging
+#         print(type(mesh_sites))
+#         return render_template('mesh.html', mesh_sites=mesh_sites)  # Pass mesh_sites to the template
+
+@app.route('/mesh', methods=["GET", "POST"])
 def temp():
-    if request.method == 'POST':
-        try:
-            data = request.get_json()  # gets the JSON
-            print(type(data))
-            print(f'Data Received: {data}')
-            mesh_sites=create_mesh(data)
-            print(f'Sending to mesh page:{mesh_sites}')
-            print(type(mesh_sites))
-            return render_template('mesh.html', mesh_sites=mesh_sites)
-        except Exception as e:
-            print(f'Error parsing JSON: {e}')
-            return "Error parsing JSON", 400  # Send a proper error response
-    
-    else:
-        return render_template('mesh.html',mesh_sites="")
+    # You don't need to pass 'mesh_sites' here anymore because it's handled in JavaScript
+    return render_template('mesh.html')
 @app.route('/meshGenerator')
 def meshGenerator():
         return render_template('meshGenerator.html')

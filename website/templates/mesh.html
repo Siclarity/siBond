@@ -128,7 +128,10 @@
                 display: flex;
                 flex-direction: column;
             }
-
+            .mesh_info{
+                display: flex;
+                flex-direction: column;
+            }
 
     </style>
     </head>
@@ -188,16 +191,16 @@
                         <button class="submit" id="test"> Test this Mesh </button>      
                     </div>
                 </div>
-                <div id="mesh_sites">
-                    {{ mesh_sites | tojson | safe }}
+                <div class="mesh_info">
+                    <label for="dataDropdown">Choose a mesh to view:</label>
+                    <select id="dataDropdown">
+                        <option value="">Select Mesh</option>
+                    </select>
+                    <div id="dataDisplay">
+                        <p>Select an option from the dropdown to see the information.</p>
+                    </div>
                 </div>
-        </div>
-        <script type="text/javascript">
-            // Retrieve the JSON data from the hidden div
-            var siteData = JSON.parse(document.getElementById("mesh_sites").textContent);
-            console.log(siteData);  // Check if data is properly populated
-
-        </script>
+            </div>
         </body>
         <script>
            var sliders = [
@@ -265,5 +268,74 @@
                 }
             }
             tempStepsInput.addEventListener("input", createTempBoxes);
+        </script>
+        <script>
+           // Retrieve the 'mesh_sites' data from sessionStorage
+        var meshSites = sessionStorage.getItem('mesh_sites');
+        if (meshSites) {
+            // Parse the JSON string into a JavaScript object
+            var data = JSON.parse(meshSites);
+            var dropdown = document.getElementById("dataDropdown");
+            for (var key in data) {
+                if (data.hasOwnProperty(key)) {
+                    var option = document.createElement("option");
+                    option.value = key;
+                    option.textContent = `Mesh ${key}`;  // Label for dropdown
+                    dropdown.appendChild(option);
+                }
+            }
+            dropdown.addEventListener('change', function() {
+                var selectedKey = this.value;
+
+                if (selectedKey) {
+                    // Display the selected mesh data
+                    var selectedData = data[selectedKey];
+                    var displayArea = document.getElementById("dataDisplay");
+
+                    //This will check to see if the input is an integer if not then it will keep up to 3 decimal places
+                    let topSiO2Width = !isNaN(selectedData["Top SiO2 Width"]) ? selectedData["Top SiO2 Width"].toFixed(3) : "N/A";
+                    let topSiO2Height = !isNaN(selectedData["Top SiO2 Height"]) ? selectedData["Top SiO2 Height"].toFixed(3) : "N/A";
+                    let topSiO2Depth = !isNaN(selectedData["Top SiO2 Depth"]) ? selectedData["Top SiO2 Depth"].toFixed(3) : "N/A";
+                    let topCur = !isNaN(selectedData["Top Cu Radius"]) ? selectedData["Top Cu Radius"].toFixed(3) : "N/A";
+                    let topCuh = !isNaN(selectedData["Top Cu Height"]) ? selectedData["Top Cu Height"].toFixed(3) : "N/A";
+                    let topRecess = !isNaN(selectedData["Top Recess Value"]) ? selectedData["Top Recess Value"].toFixed(3) : "N/A";
+                    let botSiO2Width = !isNaN(selectedData["Bot SiO2 Width"]) ? selectedData["Bot SiO2 Width"].toFixed(3) : "N/A";
+                    let botSiO2Height = !isNaN(selectedData["Bot SiO2 Height"]) ? selectedData["Bot SiO2 Height"].toFixed(3) : "N/A";
+                    let botSiO2Depth = !isNaN(selectedData["Bot SiO2 Depth"]) ? selectedData["Bot SiO2 Depth"].toFixed(3) : "N/A";
+                    let botCur = !isNaN(selectedData["Bot Cu Radius"]) ? selectedData["Bot Cu Radius"].toFixed(3) : "N/A";
+                    let botCuh = !isNaN(selectedData["Bot Cu Height"]) ? selectedData["Bot Cu Height"].toFixed(3) : "N/A";
+                    let botRecess = !isNaN(selectedData["Bot Recess Value"]) ? selectedData["Bot Recess Value"].toFixed(3) : "N/A";
+                    let OX = !isNaN(selectedData["Offset X"]) ? selectedData["Offset X"].toFixed(3) : "N/A";   
+                    let OY = !isNaN(selectedData["Offset Y"]) ? selectedData["Offset Y"].toFixed(3) : "N/A";
+                    displayArea.innerHTML = `
+                        <h3>Mesh ${selectedKey} Data:</h3>
+                            <p>Top SiO2 Width: ${topSiO2Width}</p>
+                            <p>Top SiO2 Height: ${topSiO2Height}</p>
+                            <p>Top SiO2 Depth: ${topSiO2Depth}</p>
+                            <p>Top Cu Radius: ${topCur}</p>
+                            <p>Top Cu Height: ${topCuh}</p>
+                            <p>Top Cu Recess: ${topRecess}</p>
+                            <p>Bot SiO2 Width: ${botSiO2Width}</p>
+                            <p>Bot SiO2 Height: ${botSiO2Height}</p>
+                            <p>Bot SiO2 Depth: ${botSiO2Depth}</p>
+                            <p>Bot Cu Radius: ${botCur}</p>
+                            <p>Bot Cu Height: ${botCuh}</p>
+                            <p>Bot Cu Recess: ${botRecess}</p>
+                            <p>Offset X: ${OX}</p>
+                            <p>Offset Y: ${OY}</p>
+                    `;
+                    } else {
+                    // If no data is selected, show a default message
+                    document.getElementById("dataDisplay").innerHTML = "<p>Select an option from the dropdown to see the information.</p>";
+                }
+            });
+        } else {
+            document.getElementById("mesh_sites").innerHTML = "No mesh data found.";
+        }
+        window.addEventListener('beforeunload', function() {
+            // Clear sessionStorage when the page is about to unload
+            sessionStorage.removeItem('mesh_sites');
+            console.log("sessionStorage for 'mesh_sites' cleared.");
+        });
         </script>
         </html>
