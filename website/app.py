@@ -286,8 +286,9 @@ def temp():
         except Exception as e:
             print(f'Error parsing JSON: {e}')
             return "Error parsing JSON", 400  # Send a proper error response
+    
     else:
-        return render_template('mesh.html')
+        return render_template('mesh.html',mesh_sites="")
 @app.route('/meshGenerator')
 def meshGenerator():
         return render_template('meshGenerator.html')

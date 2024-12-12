@@ -188,8 +188,16 @@
                         <button class="submit" id="test"> Test this Mesh </button>      
                     </div>
                 </div>
+                <div id="mesh_sites">
+                    {{ mesh_sites | tojson | safe }}
+                </div>
         </div>
+        <script type="text/javascript">
+            // Retrieve the JSON data from the hidden div
+            var siteData = JSON.parse(document.getElementById("mesh_sites").textContent);
+            console.log(siteData);  // Check if data is properly populated
 
+        </script>
         </body>
         <script>
            var sliders = [
