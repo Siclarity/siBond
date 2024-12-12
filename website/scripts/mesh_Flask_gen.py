@@ -2,7 +2,9 @@ import pyvista as pv
 import numpy as np
 from json import dumps,load
 import ast
-
+from os.path import join,exists
+from os import remove
+from shutil import move
 #This will convert all of the stringified dictionary to integers when coming from gds upload
 def convert_to_dict_and_keys(input_dict):
     for key, value in list(input_dict.items()):
@@ -38,6 +40,7 @@ def create_mesh(JSON_st):
                     pass
     print(f'Converted Dict:{Js_in}')
     number_of_meshes=0
+    meshes_directory =join('static', 'meshes')
     gds=False
     if keys[0]=='Dictionary':
         print("From GDS")
@@ -207,12 +210,27 @@ def create_mesh(JSON_st):
         # plot.add_mesh(Copper_top,color='yellow',opacity=1)
         # plot.show()
         count+=1
-        SiO2_bot.save(f'SiO2_bot{count}.vtk')
-        TiN_bot.save(f'TiN_bot{count}.vtk')
-        Copper_bot.save(f'Copper_bot{count}.vtk')
-        SiO2_top.save(f'SiO2_top{count}.vtk')
-        TiN_top.save(f'TiN_top{count}.vtk')
-        Copper_top.save(f'Copper_top{count}.vtk')
+        
+        meshes = [
+            ("SiO2_bot", SiO2_bot),
+            ("TiN_bot", TiN_bot),
+            ("Copper_bot", Copper_bot),
+            ("SiO2_top", SiO2_top),
+            ("TiN_top", TiN_top),
+            ("Copper_top", Copper_top)
+        ]
+        # Loop through each mesh and save it, then move to the meshes directory
+        for mesh_name, mesh_obj in meshes:
+            # Save the mesh file
+            file_name = f'{mesh_name}{count}.vtk'
+            mesh_obj.save(file_name)
+            # Move the saved mesh to the static/meshes directory
+            target_path = join(meshes_directory, file_name)
+            if exists(target_path):
+                remove(target_path)
+                print("Mesh Deleted")
+            move(file_name, target_path) 
+
         site_information[count]={"Top SiO2 Width":SiO2_w_top,"Top SiO2 Height":SiO2_d_top,"Top SiO2 Depth":SiO2_h_top,"Top Cu Radius":Cu_r_top,"Top Cu Height":Cu_h_top, "Top Recess Value":Cu_dish_top, "Bot SiO2 Width":SiO2_w_bot, "Bot SiO2 Height":SiO2_d_bot,"Bot SiO2 Depth":SiO2_h_bot,"Bot Cu Radius":Cu_r_bot,"Bot Cu Height":Cu_h_bot, "Bot Recess Value":Cu_dish_bot, "Offset X":offset_x,"Offset Y":offset_y}
     return site_information
 

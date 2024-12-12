@@ -13,8 +13,11 @@ from json import dumps, dump
 import json
 import subprocess
 import re
+
 # from mesh_Flask_gen import *
 app = Flask(__name__)
+MESH_FOLDER=join('static','meshes')
+makedirs(MESH_FOLDER,exist_ok=True)
 
 Uploaded_GDS='uploads'
 app.config['Uploaded_GDS']=Uploaded_GDS 
@@ -300,5 +303,13 @@ def meshGenerator():
 #       SiO2w=request.form.get('sio2w')
 #       print(SiO2w)
 #   return render_template('meshGenerator.html')
+
+@app.route('/meshes/<mesh_name>')
+def serve_mesh(mesh_name):
+    if mesh_name.endswith('.vtk'):
+        return send_from_directory(MESHES_FOLDER, mesh_name)
+    else:
+        return "Can't generate mesh",400
+
 if __name__ =='__main__':
     app.run(debug=True,host='0.0.0.0')
