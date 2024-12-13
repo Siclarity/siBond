@@ -107,6 +107,7 @@ def getFile():
             clear_folder(folder)
             images=f'{cwd}\\scripts\\images'
             clear_folder(images)
+            clear_folder(MESH_FOLDER)
             #set the filename variable equal to the name of the file
             #ilename = file
             filepath = path.join(app.config['Uploaded_GDS'], filename)

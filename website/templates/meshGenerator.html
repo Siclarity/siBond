@@ -721,8 +721,8 @@
                     })
                     .then(response => response.json())  // Assuming the server responds with JSON data
                     .then(processedData => {
-                        // Store the processed data in sessionStorage
-                        sessionStorage.setItem('mesh_sites', JSON.stringify(processedData));
+                        // Store the processed data in localStorage
+                        localStorage.setItem('mesh_sites', JSON.stringify(processedData));
 
                         // Redirect to /mesh page
                         window.location.href = '/mesh';

@@ -270,8 +270,8 @@
             tempStepsInput.addEventListener("input", createTempBoxes);
         </script>
         <script>
-           // Retrieve the 'mesh_sites' data from sessionStorage
-        var meshSites = sessionStorage.getItem('mesh_sites');
+           // Retrieve the 'mesh_sites' data from localStorage
+        var meshSites = localStorage.getItem('mesh_sites');
         if (meshSites) {
             // Parse the JSON string into a JavaScript object
             var data = JSON.parse(meshSites);
@@ -333,9 +333,9 @@
             document.getElementById("mesh_sites").innerHTML = "No mesh data found.";
         }
         window.addEventListener('beforeunload', function() {
-            // Clear sessionStorage when the page is about to unload
-            sessionStorage.removeItem('mesh_sites');
-            console.log("sessionStorage for 'mesh_sites' cleared.");
+            // Clear localStorage when the page is about to unload
+            localStorage.clear();
+            console.log("Local storage has been cleared.");
         });
         </script>
         </html>

@@ -200,10 +200,11 @@
                     console.error("Error:", error);
                     alert("Error: " + error.message);
                 });
+                updateGallery();
             }
         </script>
     </head>
-    <body>  
+    <body onload="updateGallery()">  
         <div class="topbar">
             <img src="/static/images/SiClarity-Logo.png" alt="SiClarity-Logo"/>
             <h1>MELD</h1>
@@ -358,6 +359,7 @@
                         FM.textContent=`Full Match: ${data.Result.Full_Matched}`;
                         document.getElementById("Information").appendChild(FM);
                         ran_unique_site=true;
+                        updateGallery();
                     })
             }
                 
@@ -514,7 +516,10 @@
                     .then(images => {
                         const gallery = document.getElementById('gallery');
                         const existingImages = gallery.querySelectorAll('img');
-                        if (images.length === 0) {
+                        if (images.length!=0){
+                            ran_unique_site=true;
+                        }
+                        if (images.length === 0 || ran_unique_site==false) {
                             // Clear all images in the gallery
                             existingImages.forEach(img => img.remove());
                             console.log("Gallery is empty. Removed all images.");
@@ -523,7 +528,6 @@
                             generate_mesh.classList.remove('active');
                             return;
                         }
-
                         // Loop through all the images fetched from the server
                         images.sort((a, b) => {
                             // Extract the numeric part from the filenames using regular expression
@@ -559,7 +563,7 @@
                     })
                     .catch(error => console.error('Error loading gallery:', error));
             }
-        setInterval(updateGallery, 6000);
+        // setInterval(updateGallery, 6000);
         </script>
         <script>
         let availableLayers = [];
@@ -676,8 +680,8 @@
                     })
                     .then(response => response.json())  // Assuming the server responds with JSON data
                     .then(processedData => {
-                        // Store the processed data in sessionStorage
-                        sessionStorage.setItem('mesh_sites', JSON.stringify(processedData));
+                        // Store the processed data in localStorage
+                        localStorage.setItem('mesh_sites', JSON.stringify(processedData));
 
                         // Redirect to /mesh page
                         window.location.href = '/mesh';
