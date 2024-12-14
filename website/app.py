@@ -1,4 +1,4 @@
-from flask import Flask,render_template,request,jsonify,send_from_directory,redirect,url_for
+from flask import Flask,render_template,request,jsonify,send_from_directory
 from os import listdir, system, makedirs, getcwd, path, remove
 from os.path import isfile, join, isdir, exists
 from scripts.thumbnails import gds_to_image_klayout
@@ -13,7 +13,7 @@ from json import dumps, dump
 import json
 import subprocess
 import re
-
+import pyvista as pv
 # from mesh_Flask_gen import *
 app = Flask(__name__)
 MESH_FOLDER=join('static','meshes')
@@ -305,12 +305,41 @@ def meshGenerator():
 #       print(SiO2w)
 #   return render_template('meshGenerator.html')
 
-@app.route('/meshes/<mesh_name>')
-def serve_mesh(mesh_name):
-    if mesh_name.endswith('.vtk'):
-        return send_from_directory(MESHES_FOLDER, mesh_name)
-    else:
-        return "Can't generate mesh",400
+@app.route('/view_mesh/<mesh_id>')
+def view_mesh(mesh_id):
+    # List of mesh filenames for a specific mesh_id
+    mesh_files = [
+        f'SiO2_top{mesh_id}.vtk',
+        f'TiN_top{mesh_id}.vtk',
+        f'Copper_top{mesh_id}.vtk',
+        f'Copper_bot{mesh_id}.vtk',
+        f'TiN_bot{mesh_id}.vtk',
+        f'SiO2_bot{mesh_id}.vtk'
+    ]
+    plotter = pv.Plotter(off_screen=True)
+    count = 0
+    for mesh_filename in mesh_files:
+        if count == 0 or count == 5:
+            color_mesh = 'lightblue'
+        elif count == 1 or count == 4:
+            color_mesh = 'gray'
+        else:
+            color_mesh = 'orange'
+        count += 1
+        mesh_path = join(MESH_FOLDER, mesh_filename)
+        if exists(mesh_path):
+            mesh = pv.read(mesh_path)
+            plotter.add_mesh(mesh, color=color_mesh)
+    plotter.set_background('white')
+
+    # Save plotter's HTML to be used in the iframe
+    html_filename = f"{mesh_id}_combined_plot.html"
+    html_path = join(MESH_FOLDER, html_filename)
+    print(f"Meshes in the plotter:{plotter.meshes}")
+    # Use PyVista to export the HTML content of the visualization, errors here because it expects a thread
+    plotter.export_html(html_path)
+    # Return the generated HTML file to the browser
+    return send_from_directory(MESH_FOLDER, html_filename)
 
 if __name__ =='__main__':
     app.run(debug=True,host='0.0.0.0')

@@ -132,7 +132,11 @@
                 display: flex;
                 flex-direction: column;
             }
-
+            iframe{
+                width: 800px;
+                height:600px;
+                border:none;
+            }
     </style>
     </head>
     <body>  
@@ -143,7 +147,7 @@
         <div class="inner-body">
             <div class="left-side-box">
                 <div class="Current_mesh">
-                    <h2>Information about Current Mesh</h2>
+                    <h2>Mesh Visualizer</h2>
                 </div>
                 <div class="user_parameters">
                     <h6>How many temperature steps?</h6>
@@ -169,7 +173,6 @@
                     <div id="OBC_val"></div>
                     <input type="range" min="0" max="100" value="50" class="slider" id="OBC" title="Opacity of Bot Copper">
                     <div class="spacer"></div>
-                    <button class="refresh">Refresh Mesh</button>
                     <div class="spacer"></div>
                     <a href="/gds" ><button class="goBack_button"> Back to Upload GDS</button></a>
                     <div class="spacer"></div>
@@ -179,12 +182,7 @@
             </div>
                 <div class="whitespace">
                     <div class="pyvista_visualization">
-                        <h1>Mesh will load here</h1>
-                    </div>
-                    <div class="spacer"></div>
-                    <div class="mesh_parser">
-                        <button class="movement" id="previous">Previous Mesh</button>
-                        <button class="movement" id="next"> Next Mesh</button>
+                        <iframe id="meshViewer" src="" title="3D Mesh Viewer"></iframe>
                     </div>
                     <div class="spacer"></div>
                     <div>
@@ -291,7 +289,8 @@
                     // Display the selected mesh data
                     var selectedData = data[selectedKey];
                     var displayArea = document.getElementById("dataDisplay");
-
+                    const iframe = document.getElementById("meshViewer");
+                    iframe.src = `/view_mesh/${selectedKey}`;
                     //This will check to see if the input is an integer if not then it will keep up to 3 decimal places
                     let topSiO2Width = !isNaN(selectedData["Top SiO2 Width"]) ? selectedData["Top SiO2 Width"].toFixed(3) : "N/A";
                     let topSiO2Height = !isNaN(selectedData["Top SiO2 Height"]) ? selectedData["Top SiO2 Height"].toFixed(3) : "N/A";
