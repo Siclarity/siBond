@@ -393,5 +393,5 @@ class gen_Copper_piece:
             Copper_dished=Copper_dished.translate((offset_x,offset_y,distance))
             Copper_dished=Copper_dished.translate((0,0,offset_z+0.1))
         else:
-            Copper_dished=Copper_dished.translate((-offset_x,-offset_y,distance))
+            Copper_dished=Copper_dished.translate((-offset_x,-offset_y,distance-0.1))
         return Copper_dished
