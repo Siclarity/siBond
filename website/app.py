@@ -14,6 +14,7 @@ import json
 import subprocess
 import re
 import pyvista as pv
+import asyncio
 # from mesh_Flask_gen import *
 app = Flask(__name__)
 MESH_FOLDER=join('static','meshes')
@@ -317,6 +318,7 @@ def view_mesh(mesh_id):
         f'SiO2_bot{mesh_id}.vtk'
     ]
     plotter = pv.Plotter(off_screen=True)
+    plotter.clear()
     count = 0
     for mesh_filename in mesh_files:
         if count == 0 or count == 5:
@@ -329,15 +331,20 @@ def view_mesh(mesh_id):
         mesh_path = join(MESH_FOLDER, mesh_filename)
         if exists(mesh_path):
             mesh = pv.read(mesh_path)
-            plotter.add_mesh(mesh, color=color_mesh)
+            plotter.add_mesh(mesh, color=color_mesh, opacity=0.5)
     plotter.set_background('white')
 
-    # Save plotter's HTML to be used in the iframe
-    html_filename = f"{mesh_id}_combined_plot.html"
-    html_path = join(MESH_FOLDER, html_filename)
-    print(f"Meshes in the plotter:{plotter.meshes}")
-    # Use PyVista to export the HTML content of the visualization, errors here because it expects a thread
-    plotter.export_html(html_path)
+    async def export_mesh():
+        html_filename = f"{mesh_id}_combined_plot.html"
+        html_path = join(MESH_FOLDER, html_filename)
+        print(f"Meshes in the plotter: {plotter.meshes}")
+        plotter.export_html(html_path)
+        return html_filename
+     # Run the event loop in the current thread
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    html_filename = loop.run_until_complete(export_mesh())
+
     # Return the generated HTML file to the browser
     return send_from_directory(MESH_FOLDER, html_filename)
 
