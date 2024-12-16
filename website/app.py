@@ -309,12 +309,12 @@ def meshGenerator():
 @app.route('/view_mesh/<mesh_id>')
 def view_mesh(mesh_id):
     opacity_values = {
-        "OTD": request.args.get("OTD", default=1.0, type=float)/100.0,
-        "OTM": request.args.get("OTM", default=1.0, type=float)/100.0,
-        "OTC": request.args.get("OTC", default=1.0, type=float)/100.0,
-        "OBC": request.args.get("OBC", default=1.0, type=float)/100.0,
-        "OBM": request.args.get("OBM", default=1.0, type=float)/100.0,
-        "OBD": request.args.get("OBD", default=1.0, type=float)/100.0
+        "OTD": request.args.get("OTD", default=50.0, type=float)/100.0,
+        "OTM": request.args.get("OTM", default=50.0, type=float)/100.0,
+        "OTC": request.args.get("OTC", default=50.0, type=float)/100.0,
+        "OBC": request.args.get("OBC", default=50.0, type=float)/100.0,
+        "OBM": request.args.get("OBM", default=50.0, type=float)/100.0,
+        "OBD": request.args.get("OBD", default=50.0, type=float)/100.0
     }
     # List of mesh filenames for a specific mesh_id
     mesh_files = [
