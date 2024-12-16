@@ -308,6 +308,14 @@ def meshGenerator():
 
 @app.route('/view_mesh/<mesh_id>')
 def view_mesh(mesh_id):
+    opacity_values = {
+        "OTD": request.args.get("OTD", default=1.0, type=float)/100.0,
+        "OTM": request.args.get("OTM", default=1.0, type=float)/100.0,
+        "OTC": request.args.get("OTC", default=1.0, type=float)/100.0,
+        "OBC": request.args.get("OBC", default=1.0, type=float)/100.0,
+        "OBM": request.args.get("OBM", default=1.0, type=float)/100.0,
+        "OBD": request.args.get("OBD", default=1.0, type=float)/100.0
+    }
     # List of mesh filenames for a specific mesh_id
     mesh_files = [
         f'SiO2_top{mesh_id}.vtk',
@@ -321,8 +329,21 @@ def view_mesh(mesh_id):
     plotter.clear()
     count = 0
     for mesh_filename in mesh_files:
+        if mesh_filename.startswith("SiO2_top"):
+            opacity = opacity_values["OTD"]
+        elif mesh_filename.startswith("TiN_top"):
+            opacity = opacity_values["OTM"]
+        elif mesh_filename.startswith("Copper_top"):
+            opacity = opacity_values["OTC"]
+        elif mesh_filename.startswith("Copper_bot"):
+            opacity = opacity_values["OBC"]
+        elif mesh_filename.startswith("TiN_bot"):
+            opacity = opacity_values["OBM"]
+        elif mesh_filename.startswith("SiO2_bot"):
+            opacity = opacity_values["OBD"]
+        print(f'Opacity{opacity}')
         if count == 0 or count == 5:
-            color_mesh = 'lightblue'
+            color_mesh = 'cyan'
         elif count == 1 or count == 4:
             color_mesh = 'gray'
         else:
@@ -331,13 +352,13 @@ def view_mesh(mesh_id):
         mesh_path = join(MESH_FOLDER, mesh_filename)
         if exists(mesh_path):
             mesh = pv.read(mesh_path)
-            plotter.add_mesh(mesh, color=color_mesh, opacity=0.5)
+            plotter.add_mesh(mesh, color=color_mesh, opacity=opacity)
     plotter.set_background('white')
 
     async def export_mesh():
         html_filename = f"{mesh_id}_combined_plot.html"
         html_path = join(MESH_FOLDER, html_filename)
-        print(f"Meshes in the plotter: {plotter.meshes}")
+        #print(f"Meshes in the plotter: {plotter.meshes}")
         plotter.export_html(html_path)
         return html_filename
      # Run the event loop in the current thread

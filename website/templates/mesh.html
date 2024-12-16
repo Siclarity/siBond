@@ -337,4 +337,32 @@
             console.log("Local storage has been cleared.");
         });
         </script>
+        <script>
+            function updateIframe() {
+                var selectedKey = document.getElementById("dataDropdown").value; // Gets the value from the dropdown
+                var url = `/view_mesh/${selectedKey}?`;//uses the same url to update the value
+
+                // Append the slider values as query parameters
+                sliders.forEach(function(sliderObj) {
+                    var opacityValue = sliderObj.slider.value;
+                    url += `${sliderObj.slider.id}=${opacityValue}&`;  // Add each slider value to the URL
+                });
+
+                // Remove the last '&' from the URL
+                url = url.slice(0, -1);
+
+                // Update the iframe source
+                document.getElementById("meshViewer").src = url;
+            }
+
+            // Add event listeners to sliders to call the updateIframe function whenever they change
+            sliders.forEach(function(sliderObj) {
+                sliderObj.slider.addEventListener("input", function() {
+                    // Update the slider's corresponding output value
+                    sliderObj.output.textContent = sliderObj.slider.value;
+                    // Call the updateIframe function to refresh the iframe
+                    updateIframe();
+                });
+            });
+        </script>
         </html>

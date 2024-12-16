@@ -198,7 +198,7 @@ def create_mesh(JSON_st):
         Cu_bot_dimension=(Cu_r_bot,Cu_h_bot)
         Copper_bot_mat=Material("Cu",Cu_bot_dimension,"Finer")
         Copper_bot=gen_Copper_piece(Copper_bot_mat.shape,Cu_dish_bot,'bot',recess_shape)
-        Copper_bot=Copper_bot.mesh_gen(shift_recess_bot,TiN_h_bot,SiO2_h_bot,offset_x,offset_y,None)
+        Copper_bot=Copper_bot.mesh_gen(shift_recess_bot,TiN_h_bot,SiO2_h_bot,offset_x,offset_y,0)
 
         #generates the full assembly
         # plot=pv.Plotter()
@@ -391,7 +391,7 @@ class gen_Copper_piece:
         if(self.position=='top'):
             #distance+=0.1
             Copper_dished=Copper_dished.translate((offset_x,offset_y,distance))
-            Copper_dished=Copper_dished.translate((0,0,offset_z))
+            Copper_dished=Copper_dished.translate((0,0,offset_z+0.1))
         else:
             Copper_dished=Copper_dished.translate((-offset_x,-offset_y,distance))
         return Copper_dished
