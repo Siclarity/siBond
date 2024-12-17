@@ -189,6 +189,7 @@
                         throw new Error("Network response was not ok: " + response.statusText);
                     }
                     return response.json();
+                    ran_unique_site=false;
                 })
                 .then(data => {
                     // Handle the response data
@@ -510,22 +511,32 @@
         </script>
 
         <script>
+            var reupdate_gal=false;
+
             function updateGallery() {
                 fetch('/gallery')
                     .then(response => response.json())
                     .then(images => {
                         const gallery = document.getElementById('gallery');
                         const existingImages = gallery.querySelectorAll('img');
-                        if (images.length!=0){
-                            ran_unique_site=true;
-                        }
-                        if (images.length === 0 || ran_unique_site==false) {
+                        if ((images.length === 0 || ran_unique_site==false)&& reupdate_gal==false) {
                             // Clear all images in the gallery
+                            gallery.innerHTML="";
                             existingImages.forEach(img => img.remove());
                             console.log("Gallery is empty. Removed all images.");
                             const generate_mesh=document.getElementById('generateMesh');
                             generate_mesh.disabled=true;
                             generate_mesh.classList.remove('active');
+                            gallery.innerHTML='';
+                            reupdate_gal=true;
+                            console.log('Reruning updateGallery');
+                            updateGallery();
+                            console.log('Returning out of updateGallery');
+                            return;
+                        }
+                        if(reupdate_gal==true){
+                            reupdate_gal=false;
+                            console.log('Re update Gallery is now false');
                             return;
                         }
                         // Loop through all the images fetched from the server
