@@ -73,8 +73,8 @@ def create_mesh(JSON_st):
             SiO2_d_top=abs(Js_in['OffsetM2'])
             SiO2_h_top=abs(Js_in['HeightM2'])
             Cu_r_top_type=current_count.get('Shape 2 type:')
-            Cu_r_top=s2_width
-            Cu_h_top=s2_height
+            Cu_r_top=s2_width*dbUnit
+            Cu_h_top=s2_height*dbUnit
             Cu_dish_top=abs(Js_in['HeightV1V2'])
 
             SiO2_w_bot=abs(Js_in['OffsetM1'])
@@ -82,16 +82,14 @@ def create_mesh(JSON_st):
             SiO2_h_bot=abs(Js_in['HeightM1'])
             #Will need this for later different shapes types of Copper
             Cu_r_bot_type=current_count.get('Shape 1 type:')
-            Cu_r_bot=s1_width
-            Cu_h_bot=s1_height
+            Cu_r_bot=s1_width*dbUnit
+            Cu_h_bot=s1_height*dbUnit
             Cu_dish_bot=abs(Js_in['HeightV1V2'])
 
             offset_x=abs(Js_in['OffsetV1V2'])
             offset_y=0
 
             recess_shape="ellipse"
-            shift_recess_top=2
-            shift_recess_bot=5
         #if this is just the Create your own mesh we can assign from the dictionary 
         else:
             SiO2_w_top=Js_in['TSiO2w']
@@ -148,7 +146,7 @@ def create_mesh(JSON_st):
         shift_recess_bot=0
         CD=0
         temp=300
-        print(SiO2_w_top,SiO2_d_top,SiO2_h_top,Cu_r_top,Cu_h_top,Cu_dish_top,SiO2_h_bot,SiO2_w_bot,SiO2_d_bot,Cu_r_bot,Cu_h_bot,Cu_dish_bot, offset_x,offset_y)
+        print(SiO2_w_top,SiO2_d_top,SiO2_h_top,Cu_r_top,Cu_h_top,Cu_dish_top,SiO2_h_bot,SiO2_w_bot,SiO2_d_bot,Cu_r_bot,Cu_h_bot,Cu_dish_bot, offset_x,offset_y,recess_shape, Cu_dish_top,Cu_dish_bot)
         TiN_r_top=Cu_r_top+0.01
         TiN_h_top=Cu_h_top+0.01
         TiN_r_bot=Cu_r_bot+0.01
@@ -345,7 +343,7 @@ class gen_Copper_piece:
         Copper=Copper.triangulate()
         if(self.indent=='ellipse'):#seems to work
             # Define the ellipsoid parameters
-            center = np.array([0,0,(height_offset/2)])  # Center of the ellipsoid (x, y, z)
+            center = np.array([0,0,(height_offset)])  # Center of the ellipsoid (x, y, z)
             #radii = np.array([1,1,Cu_dish_top)
             radii = np.array([1,1,self.indent_radius])  # Radii along x, y, and z axes
             # Create a mesh of the unit sphere (scaled to make it an ellipsoid)

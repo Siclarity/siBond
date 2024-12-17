@@ -189,7 +189,7 @@
                         throw new Error("Network response was not ok: " + response.statusText);
                     }
                     return response.json();
-                    ran_unique_site=false;
+                    
                 })
                 .then(data => {
                     // Handle the response data
@@ -201,7 +201,10 @@
                     console.error("Error:", error);
                     alert("Error: " + error.message);
                 });
-                updateGallery();
+                ran_unique_site=false;
+                setTimeout(() => {  
+                            updateGallery(); 
+                    }, 3000);
             }
         </script>
     </head>
@@ -360,7 +363,9 @@
                         FM.textContent=`Full Match: ${data.Result.Full_Matched}`;
                         document.getElementById("Information").appendChild(FM);
                         ran_unique_site=true;
-                        updateGallery();
+                        setTimeout(() => {  
+                            updateGallery(); 
+                        }, 3000);
                     })
             }
                 
@@ -519,6 +524,10 @@
                     .then(images => {
                         const gallery = document.getElementById('gallery');
                         const existingImages = gallery.querySelectorAll('img');
+                        if(images.length!=0){
+                            ran_unique_site=true;
+                            console.log(images.length);
+                        }
                         if ((images.length === 0 || ran_unique_site==false)&& reupdate_gal==false) {
                             // Clear all images in the gallery
                             gallery.innerHTML="";
