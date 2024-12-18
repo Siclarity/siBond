@@ -343,7 +343,7 @@ class gen_Copper_piece:
         Copper=Copper.triangulate()
         if(self.indent=='ellipse'):#seems to work
             # Define the ellipsoid parameters
-            center = np.array([0,0,(height_offset)])  # Center of the ellipsoid (x, y, z)
+            center = np.array([0,0,(height_offset/2)])  # Center of the ellipsoid (x, y, z)
             #radii = np.array([1,1,Cu_dish_top)
             radii = np.array([1,1,self.indent_radius])  # Radii along x, y, and z axes
             # Create a mesh of the unit sphere (scaled to make it an ellipsoid)
