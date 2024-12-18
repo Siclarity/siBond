@@ -8,15 +8,15 @@ SiO2_h_top=30
 
 Cu_r_top=2
 Cu_h_top=10
-Cu_dish_top=2000e-3
+Cu_dish_top=1000e-3
 
 SiO2_w_bot=20
 SiO2_d_bot=20
 SiO2_h_bot=40
 
-Cu_r_bot=1.99
-Cu_h_bot=9.99
-Cu_dish_bot=2000e-3
+Cu_r_bot=4
+Cu_h_bot=5
+Cu_dish_bot=2500e-3
 
 offset_x=0
 offset_y=0
@@ -24,11 +24,11 @@ offset_y=0
 recess_shape="ellipse"
 square_param_l=2
 square_param_w=1
-shift_recess_top=2
-shift_recess_bot=5
+shift_recess_top=0
+shift_recess_bot=0
 CD=0
 temp=300
-
+pv.global_theme.allow_empty_mesh = True
 class Material:
     def __init__(self,material,shape,mesh):
         self.material=material
@@ -62,10 +62,10 @@ class gen_SiO2_block:
         SiO2_cube=SiO2_cube.triangulate()
         TiN_hole=TiN_hole.triangulate()
         SiO2_cube_fin=SiO2_cube.boolean_difference(TiN_hole)
-        plotter=pv.Plotter()
-        plotter.add_mesh(SiO2_cube_fin,color="cyan",opacity=0.75)
-        #plotter.add_mesh(TiN_hole,color="gray",opacity=0.9)
-        plotter.show()
+        # plotter=pv.Plotter()
+        # plotter.add_mesh(SiO2_cube_fin,color="cyan",opacity=0.75)
+        # #plotter.add_mesh(TiN_hole,color="gray",opacity=0.9)
+        # plotter.show()
         return SiO2_cube_fin
 
 #purpose of this class is to generate the TiN thin layer
@@ -101,13 +101,13 @@ class gen_TiN_layer:
         Copper_rem=Copper_rem.triangulate()
         TiN=TiN_hole.boolean_difference(Copper_rem)
         #TiN=TiN.clean()
-        plotter2=pv.Plotter()
-        if(self.position=='top'):
-            color='lightblue'
-        else:
-            color='gray'
-        plotter2.add_mesh(TiN,color,style="wireframe",line_width=10,opacity=0.75)
-        plotter2.show()
+        # plotter2=pv.Plotter()
+        # if(self.position=='top'):
+        #     color='lightblue'
+        # else:
+        #     color='gray'
+        # plotter2.add_mesh(TiN,color,style="wireframe",line_width=10,opacity=0.75)
+        # plotter2.show()
         return TiN
 
 
@@ -140,23 +140,37 @@ class gen_Copper_piece:
         Copper=Copper.triangulate()
         if(self.indent=='ellipse'):#seems to work
             # Define the ellipsoid parameters
-            center = np.array([0,0,(height_offset/2)])  # Center of the ellipsoid (x, y, z)
+            print(f"Z Center:{height_offset/2}")
+            print(f"Recess value:{self.indent_radius}")
+            center = np.array([0,0,height_offset/2])  # Center of the ellipsoid (x, y, z)
+            print(f'Center:{center}')
             #radii = np.array([1,1,Cu_dish_top)
-            radii = np.array([1,1,self.indent_radius])  # Radii along x, y, and z axes
+            radii = np.array([1,1,self.indent_radius/self.radius])  # Radii along x, y, and z axes
+            print(f'Radii:{radii}')
             # Create a mesh of the unit sphere (scaled to make it an ellipsoid)
             sphere = pv.Sphere(radius=self.radius, theta_resolution=50, phi_resolution=50)
             # Apply scaling to transform the sphere into an ellipsoid
             transform = np.diag(radii.tolist() + [1])  # Scaling matrix
+            print(f'Transform:{transform}')
             ellipsoid = sphere.transform(transform, inplace=False)
+            print(f"Ellipse before translation:{ellipsoid}")
             # Translate the ellipsoid to the desired coordinates
             ellipsoid.translate(center, inplace=True)
+            print(f"Ellipse after translation:{ellipsoid}")
             # Ellipsoid with a long x-axis
             # ellipsoid = pv.ParametricEllipsoid(10, 5, 5)
-            Copper_dished=Copper.boolean_difference(ellipsoid)
             if(self.position=='top'):
+                #ellipsoid.translate((0,0,-1),inplace=True)
+                Copper_dished=Copper.boolean_difference(ellipsoid)
+                print(f'Top ellipsoid position:{ellipsoid}')
                 Copper_dished=Copper_dished.rotate_y(180)
+            else:
+                # ellipsoid.translate(center, inplace=True)
+                print(f'Bot ellipsoid position:{ellipsoid}')
+                Copper_dished=Copper.boolean_difference(ellipsoid)
             plotter3=pv.Plotter()
             #plotter3.add_mesh(ellipsoid,color="green",opacity=0.75)
+            plotter3.add_mesh(ellipsoid,color='black',opacity=0.9)
             plotter3.add_mesh(Copper_dished,color="orange",opacity=0.9)
             plotter3.show()
             
@@ -210,10 +224,10 @@ SiO2_bot_mat=Material("SiO2",SiO2_bot_dimension,"Normal")
 SiO2_bot=gen_SiO2_block(SiO2_bot_mat.shape,'bot')
 SiO2_bot=SiO2_bot.mesh_gen()
 #Displays the 2 SiO2 blocks
-plot=pv.Plotter()
-plot.add_mesh(SiO2_top,color='cyan',opacity=0.75)
-plot.add_mesh(SiO2_bot,color='red',opacity=0.75)
-plot.show()
+# plot=pv.Plotter()
+# plot.add_mesh(SiO2_top,color='cyan',opacity=0.75)
+# plot.add_mesh(SiO2_bot,color='red',opacity=0.75)
+# plot.show()
 #generates the Top Thin TiN layer
 TiN_dimension_top=(TiN_r_top,TiN_h_top)
 TiN_top_mat=Material("TiN",TiN_dimension_top,"Finer")
@@ -226,12 +240,12 @@ TiN_bot_mat=Material("TiN",TiN_dimension_bot,"Finer")
 TiN_bot=gen_TiN_layer(TiN_bot_mat.shape,'bot')
 TiN_bot=TiN_bot.mesh_gen()
 #Displays the 2 TiN layers within the SiO2 blocks
-plot=pv.Plotter()
-plot.add_mesh(SiO2_bot,color='cyan',opacity=0.5)
-plot.add_mesh(TiN_bot,color='red',opacity=0.75)
-plot.add_mesh(SiO2_top,color='cyan',opacity=0.5)
-plot.add_mesh(TiN_top,color='green',opacity=0.75)
-plot.show()
+# plot=pv.Plotter()
+# plot.add_mesh(SiO2_bot,color='cyan',opacity=0.5)
+# plot.add_mesh(TiN_bot,color='red',opacity=0.75)
+# plot.add_mesh(SiO2_top,color='cyan',opacity=0.5)
+# plot.add_mesh(TiN_top,color='green',opacity=0.75)
+# plot.show()
 #generates the Top Copper
 Cu_top_dimension=(Cu_r_top,Cu_h_top)
 Copper_top_mat=Material("Cu",Cu_top_dimension,"Finer")

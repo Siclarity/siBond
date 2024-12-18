@@ -343,23 +343,37 @@ class gen_Copper_piece:
         Copper=Copper.triangulate()
         if(self.indent=='ellipse'):#seems to work
             # Define the ellipsoid parameters
-            center = np.array([0,0,(height_offset/2)])  # Center of the ellipsoid (x, y, z)
+            # print(f"Z Center:{height_offset/2}")
+            # print(f"Recess value:{self.indent_radius}")
+            center = np.array([0,0,height_offset/2])  # Center of the ellipsoid (x, y, z)
+            # print(f'Center:{center}')
             #radii = np.array([1,1,Cu_dish_top)
-            radii = np.array([1,1,self.indent_radius])  # Radii along x, y, and z axes
+            radii = np.array([1,1,self.indent_radius/self.radius])  # Radii along x, y, and z axes
+            # print(f'Radii:{radii}')
             # Create a mesh of the unit sphere (scaled to make it an ellipsoid)
             sphere = pv.Sphere(radius=self.radius, theta_resolution=50, phi_resolution=50)
             # Apply scaling to transform the sphere into an ellipsoid
             transform = np.diag(radii.tolist() + [1])  # Scaling matrix
+            # print(f'Transform:{transform}')
             ellipsoid = sphere.transform(transform, inplace=False)
+            # print(f"Ellipse before translation:{ellipsoid}")
             # Translate the ellipsoid to the desired coordinates
             ellipsoid.translate(center, inplace=True)
+            # print(f"Ellipse after translation:{ellipsoid}")
             # Ellipsoid with a long x-axis
             # ellipsoid = pv.ParametricEllipsoid(10, 5, 5)
-            Copper_dished=Copper.boolean_difference(ellipsoid)
             if(self.position=='top'):
+                # ellipsoid.translate((0,0,-1),inplace=True)
+                Copper_dished=Copper.boolean_difference(ellipsoid)
+                # print(f'Top ellipsoid position:{ellipsoid}')
                 Copper_dished=Copper_dished.rotate_y(180)
+            else:
+                # ellipsoid.translate(center, inplace=True)
+                # print(f'Bot ellipsoid position:{ellipsoid}')
+                Copper_dished=Copper.boolean_difference(ellipsoid)
             # plotter3=pv.Plotter()
-            # plotter3.add_mesh(ellipsoid,color="green",opacity=0.75)
+            #plotter3.add_mesh(ellipsoid,color="green",opacity=0.75)
+            # plotter3.add_mesh(ellipsoid,color='black',opacity=0.9)
             # plotter3.add_mesh(Copper_dished,color="orange",opacity=0.9)
             # plotter3.show()
             
