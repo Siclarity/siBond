@@ -8,7 +8,7 @@ SiO2_h_top=30
 
 Cu_r_top=2
 Cu_h_top=10
-Cu_dish_top=1000e-3
+Cu_dish_top=5e-3
 
 SiO2_w_bot=20
 SiO2_d_bot=20
@@ -16,14 +16,12 @@ SiO2_h_bot=40
 
 Cu_r_bot=4
 Cu_h_bot=5
-Cu_dish_bot=2500e-3
+Cu_dish_bot=2.5e-3
 
 offset_x=0
 offset_y=0
 
-recess_shape="ellipse"
-square_param_l=2
-square_param_w=1
+recess_shape="sphere"
 shift_recess_top=0
 shift_recess_bot=0
 CD=0
@@ -118,7 +116,7 @@ class gen_Copper_piece:
         if(indent=='ellipse'):
             self.indent_radius=dim
         if(indent=='square'):
-            self.indent_length,self.indent_width,self.indent_depth=dim
+          self.indent_depth=dim
         elif(indent=='sphere'):
             self.indent_radius=dim
         self.position=position
@@ -175,7 +173,7 @@ class gen_Copper_piece:
             plotter3.show()
             
         elif(self.indent=='square'):
-            Cu_cube=pv.Cube(center=(0,0,0),bounds=(-(self.indent_length),(self.indent_length),-(self.indent_width),(self.indent_width),-(self.indent_depth),(self.indent_depth)))
+            Cu_cube=pv.Cube(center=(0,0,0),bounds=(-(self.radius/2),(self.radius/2),-(self.radius/2),(self.radius/2),-(self.indent_depth),(self.indent_depth)))
             Cu_cube=Cu_cube.triangulate()
             Cu_cube=Cu_cube.translate((0,0,height_offset/2))
             Copper_dished=Copper.boolean_difference(Cu_cube)
@@ -187,7 +185,9 @@ class gen_Copper_piece:
             plotter3.add_mesh(Copper_dished,color='orange',opacity=0.5)
             plotter3.show()
         elif(self.indent=='sphere'):
-            Cu_sphere=pv.Sphere(center=(0,0,0),radius=self.radius)
+            print(f"Indent: {self.indent_radius}")
+            print(f"Radius:{self.radius}")
+            Cu_sphere=pv.Sphere(center=(0,0,0),radius=self.indent_radius)
             Cu_sphere=Cu_sphere.translate((0,0,height_offset/2))
             Copper_dished=Copper.boolean_difference(Cu_sphere)
             if(self.position=='top'):
@@ -202,7 +202,7 @@ class gen_Copper_piece:
             Copper_dished=Copper_dished.translate((offset_x,offset_y,distance))
             Copper_dished=Copper_dished.translate((0,0,top_TiN_movement+0.1))
         else:
-            Copper_dished=Copper_dished.translate((-offset_x,-offset_y,distance))
+            Copper_dished=Copper_dished.translate((-offset_x,-offset_y,distance-0.1))
         return Copper_dished
 
 #non-user interfaced code

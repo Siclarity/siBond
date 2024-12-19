@@ -316,6 +316,7 @@ def view_mesh(mesh_id):
         "OBM": request.args.get("OBM", default=50.0, type=float)/100.0,
         "OBD": request.args.get("OBD", default=50.0, type=float)/100.0
     }
+    clipping_plane=request.args.get('clipping_plane',default='',type=str)
     # List of mesh filenames for a specific mesh_id
     mesh_files = [
         f'SiO2_top{mesh_id}.vtk',
@@ -350,7 +351,15 @@ def view_mesh(mesh_id):
             color_mesh = 'orange'
         count += 1
         mesh_path = join(MESH_FOLDER, mesh_filename)
-        if exists(mesh_path):
+        if clipping_plane:
+            mesh=pv.read(mesh_path)
+            if clipping_plane=='x':
+                plotter.add_mesh_clip_plane(mesh,normal='x')
+            elif clipping_plane=='y':
+                plotter.add_mesh_clip_plane(mesh,normal='y')
+            elif clipping_plane=='z':
+                plotter.add_mesh_clip_plane(mesh,normal='z')
+        elif exists(mesh_path):
             mesh = pv.read(mesh_path)
             plotter.add_mesh(mesh, color=color_mesh, opacity=opacity)
     plotter.set_background('white')

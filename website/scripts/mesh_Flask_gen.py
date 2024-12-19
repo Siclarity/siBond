@@ -86,7 +86,8 @@ def create_mesh(JSON_st):
             Cu_h_bot=s1_height*dbUnit
             Cu_dish_bot=abs(Js_in['HeightV1V2'])
 
-            offset_x=abs(Js_in['OffsetV1V2'])
+            # offset_x=abs(Js_in['OffsetV1V2'])
+            offset_x=0
             offset_y=0
 
             recess_shape="ellipse"
@@ -378,7 +379,7 @@ class gen_Copper_piece:
             # plotter3.show()
             
         elif(self.indent=='square'):
-            Cu_cube=pv.Cube(center=(0,0,0),bounds=(-(self.indent_depth),(self.indent_depth),-(self.indent_depth),(self.indent_depth),-(self.indent_depth),(self.indent_depth)))
+            Cu_cube=pv.Cube(center=(0,0,0),bounds=(-(self.radius/2),(self.radius/2),-(self.radius/2),(self.radius/2),-(self.indent_depth),(self.indent_depth)))
             Cu_cube=Cu_cube.triangulate()
             Cu_cube=Cu_cube.translate((0,0,height_offset/2))
             Copper_dished=Copper.boolean_difference(Cu_cube)

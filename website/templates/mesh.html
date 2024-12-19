@@ -44,7 +44,7 @@
                 align-items: center;
             }
             .whitespace .pyvista_visualization{
-                padding-top: 20rem;
+                padding-top: 10rem;
             }
             .left-side-box{
                 display:flex;
@@ -137,6 +137,48 @@
                 height:800px;
                 border:none;
             }
+            
+            .clipDropdown {
+                position: relative;
+                display: flex;
+                align-self: center;
+            }
+
+            .clipDropdown button {
+                background-color: #4CAF50; 
+                color: white;
+                padding: 10px 20px;
+                font-size: 16px;
+                border: none;
+                cursor: pointer;
+                border-radius: 5px;
+            }
+            .clipContent {
+                display: none;
+                position: absolute;
+                background-color: #f9f9f9;
+                min-width: 160px;
+                box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+                z-index: 1;
+                border-radius: 5px;
+            }
+            .clipContent div {
+                color: black;
+                padding: 12px 16px;
+                text-decoration: none;
+                display: block;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+            .clipContent div:hover {
+                background-color: #ddd;
+            }
+            .clipDropdown:hover .clipContent {
+                display: block;
+            }
+            .clipDropdown:hover button {
+                background-color: #3e8e41;
+            }
     </style>
     </head>
     <body>  
@@ -173,6 +215,8 @@
                     <div id="OBC_val"></div>
                     <input type="range" min="0" max="100" value="50" class="slider" id="OBC" title="Opacity of Bot Copper">
                     <div class="spacer"></div>
+                    <h6>Selected Clipping Plane:</h6>
+                    <p id="clipping_plane_val">Not selected</p>
                     <div class="spacer"></div>
                     <a href="/" ><button class="home_button"> Go Home</button></a>
                     <div class="spacer"></div>
@@ -180,6 +224,15 @@
             </div>
                 <div class="whitespace">
                     <div class="pyvista_visualization">
+                        <div class="clipDropdown">
+                            <button>Clip</button>
+                            <div class="clipContent">
+                                <div id="option-x">X</div>
+                                <div id="option-y">Y</div>
+                                <div id="option-z">Z</div>
+                                <div id="option-n">None</div>
+                            </div>
+                        </div>
                         <iframe id="meshViewer" src="" title="3D Mesh Viewer"></iframe>
                     </div>
                     <div class="spacer"></div>
@@ -347,6 +400,10 @@
                     var opacityValue = sliderObj.slider.value;
                     url += `${sliderObj.slider.id}=${opacityValue}&`;  // Add each slider value to the URL
                 });
+                //if there is a selected option for the clipping plane then add it to the update for iframe
+                if (clipping_plane_option){
+                    url+=`clipping_plane=${clipping_plane_option}&`;
+                }
 
                 // Remove the last '&' from the URL
                 url = url.slice(0, -1);
@@ -363,6 +420,28 @@
                     // Call the updateIframe function to refresh the iframe
                     updateIframe();
                 });
+            });
+        </script>
+        <script>
+            var clipping_plane_option='';
+            function update_clip_plane(value){
+                clipping_plane_option=value;
+                document.getElementById("clipping_plane_val").textContent=clipping_plane_option;
+                updateIframe();
+            }
+            document.getElementById("option-x").addEventListener("click", function() {
+                update_clip_plane('x');
+            });
+
+            document.getElementById("option-y").addEventListener("click", function() {
+                update_clip_plane('y');
+            });
+
+            document.getElementById("option-z").addEventListener("click", function() {
+                update_clip_plane('z');
+            });
+            document.getElementById("option-n").addEventListener("click", function() {
+                update_clip_plane('');
             });
         </script>
         </html>
