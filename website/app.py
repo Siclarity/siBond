@@ -3,6 +3,7 @@ from os import listdir, system, makedirs, getcwd, path, remove
 from os.path import isfile, join, isdir, exists
 from scripts.thumbnails import gds_to_image_klayout
 from scripts.get_layers import retrieve_layers
+from scripts.mesh_Flask_gen import create_mesh
 import shutil
 import pya
 from scripts.bondSearch_Flask import search
@@ -11,8 +12,13 @@ from scripts.layer_modifier import mod_layers
 from json import dumps, dump
 import json
 import subprocess
+import re
+import pyvista as pv
+import asyncio
 # from mesh_Flask_gen import *
 app = Flask(__name__)
+MESH_FOLDER=join('static','meshes')
+makedirs(MESH_FOLDER,exist_ok=True)
 
 Uploaded_GDS='uploads'
 app.config['Uploaded_GDS']=Uploaded_GDS 
@@ -102,6 +108,7 @@ def getFile():
             clear_folder(folder)
             images=f'{cwd}\\scripts\\images'
             clear_folder(images)
+            clear_folder(MESH_FOLDER)
             #set the filename variable equal to the name of the file
             #ilename = file
             filepath = path.join(app.config['Uploaded_GDS'], filename)
@@ -122,15 +129,36 @@ def getFile():
     #return render_template('gds.html')
         #return jsonify({"success": False})
 
-@app.route('/search')
+@app.route('/search', methods=["POST"])
 def search_sites():
+    
+    selected_layers = request.json.get('layers', [])
+    print("Selected layers:", selected_layers)
+    # Ensure selected_layers is a list of dictionaries
+    if isinstance(selected_layers, list):
+        # Log each element of selected_layers to verify the structure
+        for i, layer in enumerate(selected_layers):
+            print(f"Layer {i}: {layer}")
+    else:
+        print("Selected layers is not a list")
+    # Convert selected layers into a list of tuples (layer, datatype)
+    try:
+        visible_layer = [
+            (int(layer.split('-')[0]), int(layer.split('-')[1]))  # Split on '-' and convert to integers
+            for layer in selected_layers
+        ]
+        print(f"Formatted visible layers: {visible_layer}")
+        visible_layer_str = str(visible_layer)
+        print(f"Stringified visible layers: {visible_layer_str}")
+    except Exception as e:
+        print("Error while formatting visible layers:", e)
     files_in_folder = listdir(app.config['Uploaded_GDS'])
     # Find the .gds file in the folder
     gds_filename = None
     for filename in files_in_folder:
         if filename.endswith('.gds'):
             gds_filename=f"uploads/{filename}"
-            c=search(gds_filename)
+            c=search(gds_filename, visible_layer)
             #print(f'C:{c}')
             print(type(c))
             # diction_serialized=dumps(c)
@@ -143,14 +171,19 @@ def search_sites():
             print("Entering Unique_site")
             #print(f"Arguments passed:\n gds_folder={cwd}\\uploads \n diction={diction_serialized}")
 
-            cm=f'C:\\Users\\aneal\\AppData\\Roaming\\KLayout\\klayout_app.exe -z -r {cwd}/scripts/unique_site.py  -rd gds_folder={cwd}\\uploads  -rd diction={cwd}\\information.json"'
+            cm=f'C:\\Users\\aneal\\AppData\\Roaming\\KLayout\\klayout_app.exe -z -r {cwd}/scripts/unique_site.py  -rd gds_folder={cwd}\\uploads  -rd diction={cwd}\\information.json -rd layer="{visible_layer_str}"'
             #print(f"CM:{cm}")
             # test=system(cm)
             result=subprocess.run(cm,shell=True,capture_output=True,text=True)
             print(f"Output: {result.stdout}")
+            match = re.search(r'The DBU for the layout is:([0-9.-]+)', result.stdout)
+            if match:
+                unit=match.group(1)
+                print(f"DBU value is:{unit}")
             print(f"Error: {result.stderr}")
             print(f"Exiting Unique_Site:{result.returncode}")
-    return jsonify({"Result":c})
+    print(c)
+    return jsonify({"Result":c,"Units":unit})
 
 
 @app.route('/scripts/images/<filename>')
@@ -238,23 +271,31 @@ def update_thumbnail():
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
-@app.route('/generate_gds_mesh', methods=['POST'])
-def meshGenerate_gds():
-    data = request.json  # Get the incoming JSON data from the client
-    print("Received data:", data)
-    #writing the data that the user inputs and the backend data to a file which can be used for the python code, this file can be used for the new mesh python file
-    with open("bonding_sites.json","w") as outfile:
-        dump(data,outfile)
-    # Return a response (you can return results if needed, or just a success message)
-    return jsonify({'message': 'Success'})  # This will then forward the user to the meshGDS page
+@app.route('/generate_mesh_content', methods=['POST'])
+def meshGenerate():
+    try:
+        data = request.get_json() 
+        print(type(data))
+        print(f'Data Received: {data}')
+        mesh_sites = create_mesh(data) 
+        print(f'Storing in session: {mesh_sites}')
+        return jsonify(mesh_sites)
+    except Exception as e:
+        print(f'Error parsing data: {e}')
+        return "Error parsing the submitted data", 400 
 
-@app.route('/mesh',methods=["GET","POST"])
+# @app.route('/mesh', methods=["GET", "POST"])
+# def temp():
+#     if request.method == "GET":
+#         mesh_sites = request.args.get('mesh_sites')  # Retrieve 'mesh_sites' from query parameters
+#         print(f"Mesh Sites received: {mesh_sites}")  # You can print it or use it for debugging
+#         print(type(mesh_sites))
+#         return render_template('mesh.html', mesh_sites=mesh_sites)  # Pass mesh_sites to the template
+
+@app.route('/mesh', methods=["GET", "POST"])
 def temp():
-    if request.method=='GET':
-        return render_template('mesh.html')
-    else:
-        return  "Not yet"
-
+    # You don't need to pass 'mesh_sites' here anymore because it's handled in JavaScript
+    return render_template('mesh.html')
 @app.route('/meshGenerator')
 def meshGenerator():
         return render_template('meshGenerator.html')
@@ -264,5 +305,78 @@ def meshGenerator():
 #       SiO2w=request.form.get('sio2w')
 #       print(SiO2w)
 #   return render_template('meshGenerator.html')
+
+@app.route('/view_mesh/<mesh_id>')
+def view_mesh(mesh_id):
+    opacity_values = {
+        "OTD": request.args.get("OTD", default=50.0, type=float)/100.0,
+        "OTM": request.args.get("OTM", default=50.0, type=float)/100.0,
+        "OTC": request.args.get("OTC", default=50.0, type=float)/100.0,
+        "OBC": request.args.get("OBC", default=50.0, type=float)/100.0,
+        "OBM": request.args.get("OBM", default=50.0, type=float)/100.0,
+        "OBD": request.args.get("OBD", default=50.0, type=float)/100.0
+    }
+    clipping_plane=request.args.get('clipping_plane',default='',type=str)
+    # List of mesh filenames for a specific mesh_id
+    mesh_files = [
+        f'SiO2_top{mesh_id}.vtk',
+        f'TiN_top{mesh_id}.vtk',
+        f'Copper_top{mesh_id}.vtk',
+        f'Copper_bot{mesh_id}.vtk',
+        f'TiN_bot{mesh_id}.vtk',
+        f'SiO2_bot{mesh_id}.vtk'
+    ]
+    plotter = pv.Plotter(off_screen=True)
+    plotter.clear()
+    count = 0
+    for mesh_filename in mesh_files:
+        if mesh_filename.startswith("SiO2_top"):
+            opacity = opacity_values["OTD"]
+        elif mesh_filename.startswith("TiN_top"):
+            opacity = opacity_values["OTM"]
+        elif mesh_filename.startswith("Copper_top"):
+            opacity = opacity_values["OTC"]
+        elif mesh_filename.startswith("Copper_bot"):
+            opacity = opacity_values["OBC"]
+        elif mesh_filename.startswith("TiN_bot"):
+            opacity = opacity_values["OBM"]
+        elif mesh_filename.startswith("SiO2_bot"):
+            opacity = opacity_values["OBD"]
+        print(f'Opacity{opacity}')
+        if count == 0 or count == 5:
+            color_mesh = 'cyan'
+        elif count == 1 or count == 4:
+            color_mesh = 'gray'
+        else:
+            color_mesh = 'orange'
+        count += 1
+        mesh_path = join(MESH_FOLDER, mesh_filename)
+        if clipping_plane:
+            mesh=pv.read(mesh_path)
+            if clipping_plane=='x':
+                plotter.add_mesh_clip_plane(mesh,normal='x')
+            elif clipping_plane=='y':
+                plotter.add_mesh_clip_plane(mesh,normal='y')
+            elif clipping_plane=='z':
+                plotter.add_mesh_clip_plane(mesh,normal='z')
+        elif exists(mesh_path):
+            mesh = pv.read(mesh_path)
+            plotter.add_mesh(mesh, color=color_mesh, opacity=opacity)
+    plotter.set_background('white')
+
+    async def export_mesh():
+        html_filename = f"{mesh_id}_combined_plot.html"
+        html_path = join(MESH_FOLDER, html_filename)
+        #print(f"Meshes in the plotter: {plotter.meshes}")
+        plotter.export_html(html_path)
+        return html_filename
+     # Run the event loop in the current thread
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    html_filename = loop.run_until_complete(export_mesh())
+
+    # Return the generated HTML file to the browser
+    return send_from_directory(MESH_FOLDER, html_filename)
+
 if __name__ =='__main__':
     app.run(debug=True,host='0.0.0.0')

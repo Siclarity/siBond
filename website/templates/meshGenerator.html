@@ -207,9 +207,9 @@
                             <div class="dropdown" id="Recess Options">
                                 <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" id="dropdownMenuButton">Recess Shape</button>
                                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                  <li><button class="dropdown-item" type="button" onclick="updateDropdown('Ellipse')">Ellipse</button></li>
-                                  <li><button class="dropdown-item" type="button" onclick="updateDropdown('Square')">Square</button></li>
-                                  <li><button class="dropdown-item" type="button" onclick="updateDropdown('Sphere')">Sphere</button></li>
+                                  <li><button class="dropdown-item" type="button" onclick="updateDropdown('ellipse')">Ellipse</button></li>
+                                  <li><button class="dropdown-item" type="button" onclick="updateDropdown('square')">Square</button></li>
+                                  <li><button class="dropdown-item" type="button" onclick="updateDropdown('sphere')">Sphere</button></li>
                                 </ul>
                               </div>
                         </form>
@@ -360,7 +360,7 @@
                     a.classList.remove('conflict-border');
                     a.classList.add('false-border');
                 }
-                else if(topSiO2h< 2*topCur){
+                else if(topSiO2h<= 2*topCur){
                     a.classList.remove('neutral-border');
                     a.classList.remove('false-border');
                     a.classList.remove('true-border');
@@ -380,7 +380,7 @@
                     b.classList.remove('conflict-border');
                     b.classList.add('false-border');
                 }
-                else if(topSiO2w< 2*topCur){
+                else if(topSiO2w<= 2*topCur){
                     b.classList.remove('neutral-border');
                     b.classList.remove('false-border');
                     b.classList.remove('true-border');
@@ -477,7 +477,7 @@
                     g.classList.remove('conflict-border');
                     g.classList.add('false-border');
                 }
-                else if(botSiO2h< 2*botCur){
+                else if(botSiO2h<= 2*botCur){
                     g.classList.remove('neutral-border');
                     g.classList.remove('false-border');
                     g.classList.remove('true-border');
@@ -497,7 +497,7 @@
                     h.classList.remove('conflict-border');
                     h.classList.add('false-border');
                 }
-                else if(botSiO2w< 2*botCur){
+                else if(botSiO2w<= 2*botCur){
                     h.classList.remove('neutral-border');
                     h.classList.remove('false-border');
                     h.classList.remove('true-border');
@@ -711,26 +711,28 @@
                         O_y:oy
 
                     }
-                    alert(JSON.stringify(topSiO2,null, 2));
-                    alert(JSON.stringify(botSiO2,null, 2));
-                    fetch('/generate_gds_mesh', {
+                    // Send data to the server for processing
+                    fetch('/generate_mesh_content', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
                         body: JSON.stringify(data)  // Send the data as JSON
                     })
-                    .then(response => response.json())  // Wait for the server response
-                    .then(data => {
-                        // Once the data is processed, redirect to the custom page
-                        window.location.href = '/mesh'; 
+                    .then(response => response.json())  // Assuming the server responds with JSON data
+                    .then(processedData => {
+                        // Store the processed data in localStorage
+                        localStorage.setItem('mesh_sites', JSON.stringify(processedData));
+
+                        // Redirect to /mesh page
+                        window.location.href = '/mesh';
                     })
                     .catch(error => {
                         console.error('Error:', error);
                         alert('There was an error processing your request. Please try again.');
                     });
-            }
-        });
+                }
+            });
             document.body.addEventListener('input', function(e) {
                 // Ensure the event target is a number input
                 const submitButton=document.getElementById('submitButton');

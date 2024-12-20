@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title>Upload GDS File</title>
+        <title>Mesh Viewer Page</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
@@ -44,7 +44,7 @@
                 align-items: center;
             }
             .whitespace .pyvista_visualization{
-                padding-top: 20rem;
+                padding-top: 10rem;
             }
             .left-side-box{
                 display:flex;
@@ -128,8 +128,57 @@
                 display: flex;
                 flex-direction: column;
             }
+            .mesh_info{
+                display: flex;
+                flex-direction: column;
+            }
+            iframe{
+                width: 1000px;
+                height:800px;
+                border:none;
+            }
+            
+            .clipDropdown {
+                position: relative;
+                display: flex;
+                align-self: center;
+            }
 
-
+            .clipDropdown button {
+                background-color: #4CAF50; 
+                color: white;
+                padding: 10px 20px;
+                font-size: 16px;
+                border: none;
+                cursor: pointer;
+                border-radius: 5px;
+            }
+            .clipContent {
+                display: none;
+                position: absolute;
+                background-color: #f9f9f9;
+                min-width: 160px;
+                box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+                z-index: 1;
+                border-radius: 5px;
+            }
+            .clipContent div {
+                color: black;
+                padding: 12px 16px;
+                text-decoration: none;
+                display: block;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+            .clipContent div:hover {
+                background-color: #ddd;
+            }
+            .clipDropdown:hover .clipContent {
+                display: block;
+            }
+            .clipDropdown:hover button {
+                background-color: #3e8e41;
+            }
     </style>
     </head>
     <body>  
@@ -140,7 +189,7 @@
         <div class="inner-body">
             <div class="left-side-box">
                 <div class="Current_mesh">
-                    <h2>Information about Current Mesh</h2>
+                    <h2>Mesh Visualizer</h2>
                 </div>
                 <div class="user_parameters">
                     <h6>How many temperature steps?</h6>
@@ -166,9 +215,8 @@
                     <div id="OBC_val"></div>
                     <input type="range" min="0" max="100" value="50" class="slider" id="OBC" title="Opacity of Bot Copper">
                     <div class="spacer"></div>
-                    <button class="refresh">Refresh Mesh</button>
-                    <div class="spacer"></div>
-                    <a href="/gds" ><button class="goBack_button"> Back to Upload GDS</button></a>
+                    <h6>Selected Clipping Plane:</h6>
+                    <p id="clipping_plane_val">Not selected</p>
                     <div class="spacer"></div>
                     <a href="/" ><button class="home_button"> Go Home</button></a>
                     <div class="spacer"></div>
@@ -176,20 +224,32 @@
             </div>
                 <div class="whitespace">
                     <div class="pyvista_visualization">
-                        <h1>Mesh will load here</h1>
-                    </div>
-                    <div class="spacer"></div>
-                    <div class="mesh_parser">
-                        <button class="movement" id="previous">Previous Mesh</button>
-                        <button class="movement" id="next"> Next Mesh</button>
+                        <div class="clipDropdown">
+                            <button>Clip</button>
+                            <div class="clipContent">
+                                <div id="option-x">X</div>
+                                <div id="option-y">Y</div>
+                                <div id="option-z">Z</div>
+                                <div id="option-n">None</div>
+                            </div>
+                        </div>
+                        <iframe id="meshViewer" src="" title="3D Mesh Viewer"></iframe>
                     </div>
                     <div class="spacer"></div>
                     <div>
                         <button class="submit" id="test"> Test this Mesh </button>      
                     </div>
                 </div>
-        </div>
-
+                <div class="mesh_info">
+                    <label for="dataDropdown">Choose a mesh to view:</label>
+                    <select id="dataDropdown">
+                        <option value="">Select Mesh</option>
+                    </select>
+                    <div id="dataDisplay">
+                        <p>Select an option from the dropdown to see the information.</p>
+                    </div>
+                </div>
+            </div>
         </body>
         <script>
            var sliders = [
@@ -211,7 +271,7 @@
         <script>
             var tempStepsInput=document.getElementById('temp_steps');
             var tempDivContainer=document.getElementById('temperatureContainer');
-
+            var testButton=document.getElementById('test');
             function createTempBoxes(){
                 tempDivContainer.innerHTML='';
                 var steps=parseInt(tempStepsInput.value);
@@ -257,5 +317,227 @@
                 }
             }
             tempStepsInput.addEventListener("input", createTempBoxes);
+        </script>
+        <script>
+            //validates the inputs before moving onto the next steps
+            testButton.addEventListener("click", function() {
+                var steps = parseInt(tempStepsInput.value);
+
+                // Validation for valid number of steps
+                if (isNaN(steps) || steps <= 0) {
+                    alert("Please enter a valid positive number of temperature steps.");
+                    return; // Stop further if validation fails
+                }
+
+                var temperatures = [];
+                var times = [];
+
+                // Collecting values for each step
+                for (var i = 1; i <= steps; i++) {
+                    var tempInput = document.getElementById("temp_step_" + i);
+                    var timeInput = document.getElementById("time_step_" + i);
+
+                    // Validate the temperature and time inputs
+                    if (!tempInput || !timeInput) {
+                        continue;
+                    }
+                    var temp = parseFloat(tempInput.value);
+                    var time = parseFloat(timeInput.value);
+                    //this will check to see if the temperture is a valid number (sub 7 degC is Copper freezing) and the time input must be a valid integer
+                    if (isNaN(temp) || isNaN(time) || temp < -7 || time <= 0) {
+                        alert("Please enter valid values for Temperature " + i + " and Time "+ i +".");
+                        return;
+                    }
+
+                    // Store the values in arrays
+                    temperatures.push(temp);
+                    times.push(time);
+                }
+                var displayed_mesh_data=document.getElementById("dataDisplay").textContent.trim();
+                if (displayed_mesh_data=== "Select an option from the dropdown to see the information."){
+                    alert("Please select a mesh");
+                    return;
+                }
+                
+             // Show an alert with the collected data
+            alert("Temperatures: " + temperatures.join(", ") + " °C\n" +
+                "Times: " + times.join(", ") + " s\n"+
+                "Top SiO2 Width: " +f_top_SiO2_Width +' um\n'+
+                "Top SiO2 Height: "+ f_top_SiO2_Height +' um\n'+
+                "Top SiO2 Depth: "+ f_top_SiO2_Depth +' um\n'+
+                "Top Cu Radius: "+ f_top_Cu_r +' um\n'+
+                "Top Cu Height: "+ f_top_Cu_d+' um\n'+
+                "Top Recess: "+ f_top_Recess+' nm\n'+
+                "Bot SiO2 Width: " +f_bot_SiO2_Width +' um\n'+
+                "Bot SiO2 Height: "+ f_bot_SiO2_Height +' um\n'+
+                "Bot SiO2 Depth: "+ f_bot_SiO2_Depth +' um\n'+
+                "Bot Cu Radius: "+ f_bot_Cu_r +' um\n'+
+                "Bot Cu Height: "+ f_bot_Cu_d+' um\n'+
+                "Bot Recess: "+ f_bot_Recess +' nm\n'+
+                "Recess Shape: "+f_recess_shape+'\n'+
+                "Offset X: " + f_OX +' um\n'+
+                "Offset Y: "+ f_OY +' um\n');
+        });
+        </script>
+        <script>
+           // Retrieve the 'mesh_sites' data from localStorage
+           var f_top_SiO2_Width;
+           var f_top_SiO2_Height;
+           var f_top_SiO2_Depth;
+           var f_top_Cu_r;
+           var f_top_Cu_d;
+           var f_top_Recess;
+           var f_bot_SiO2_Width;
+           var f_bot_SiO2_Height;
+           var f_bot_SiO2_Depth;
+           var f_bot_Cu_r;
+           var f_bot_Cu_d;
+           var f_bot_Recess;
+           var f_recess_shape;
+           var f_OX;
+           var f_OY;
+        var meshSites = localStorage.getItem('mesh_sites');
+        if (meshSites) {
+            // Parse the JSON string into a JavaScript object
+            var data = JSON.parse(meshSites);
+            var dropdown = document.getElementById("dataDropdown");
+            for (var key in data) {
+                if (data.hasOwnProperty(key)) {
+                    var option = document.createElement("option");
+                    option.value = key;
+                    option.textContent = `Mesh ${key}`;  // Label for dropdown
+                    dropdown.appendChild(option);
+                }
+            }
+            dropdown.addEventListener('change', function() {
+                var selectedKey = this.value;
+
+                if (selectedKey) {
+                    // Display the selected mesh data
+                    var selectedData = data[selectedKey];
+                    var displayArea = document.getElementById("dataDisplay");
+                    const iframe = document.getElementById("meshViewer");
+                    iframe.src = `/view_mesh/${selectedKey}`;
+                    //This will check to see if the input is an integer if not then it will keep up to 3 decimal places
+                    let topSiO2Width = !isNaN(selectedData["Top SiO2 Width"]) ? selectedData["Top SiO2 Width"].toFixed(3) : "N/A";
+                    let topSiO2Height = !isNaN(selectedData["Top SiO2 Height"]) ? selectedData["Top SiO2 Height"].toFixed(3) : "N/A";
+                    let topSiO2Depth = !isNaN(selectedData["Top SiO2 Depth"]) ? selectedData["Top SiO2 Depth"].toFixed(3) : "N/A";
+                    let topCur = !isNaN(selectedData["Top Cu Radius"]) ? selectedData["Top Cu Radius"].toFixed(3) : "N/A";
+                    let topCuh = !isNaN(selectedData["Top Cu Height"]) ? selectedData["Top Cu Height"].toFixed(3) : "N/A";
+                    let topRecess = !isNaN(selectedData["Top Recess Value"]) ? selectedData["Top Recess Value"].toFixed(3) : "N/A";
+                    let botSiO2Width = !isNaN(selectedData["Bot SiO2 Width"]) ? selectedData["Bot SiO2 Width"].toFixed(3) : "N/A";
+                    let botSiO2Height = !isNaN(selectedData["Bot SiO2 Height"]) ? selectedData["Bot SiO2 Height"].toFixed(3) : "N/A";
+                    let botSiO2Depth = !isNaN(selectedData["Bot SiO2 Depth"]) ? selectedData["Bot SiO2 Depth"].toFixed(3) : "N/A";
+                    let botCur = !isNaN(selectedData["Bot Cu Radius"]) ? selectedData["Bot Cu Radius"].toFixed(3) : "N/A";
+                    let botCuh = !isNaN(selectedData["Bot Cu Height"]) ? selectedData["Bot Cu Height"].toFixed(3) : "N/A";
+                    let botRecess = !isNaN(selectedData["Bot Recess Value"]) ? selectedData["Bot Recess Value"].toFixed(3) : "N/A";
+                    let rshape=(selectedData["Recess Shape"]);
+                    let OX = !isNaN(selectedData["Offset X"]) ? selectedData["Offset X"].toFixed(3) : "N/A";   
+                    let OY = !isNaN(selectedData["Offset Y"]) ? selectedData["Offset Y"].toFixed(3) : "N/A";
+                    botRecess=botRecess*1000
+                    topRecess=topRecess*1000
+                    f_top_SiO2_Width=topSiO2Width;
+                    f_top_SiO2_Height=topSiO2Height;
+                    f_top_SiO2_Depth=topSiO2Depth;
+                    f_top_Cu_r=topCur;
+                    f_top_Cu_d=topCuh;
+                    f_top_Recess=topRecess;
+                    f_bot_SiO2_Width=botSiO2Width;
+                    f_bot_SiO2_Height=botSiO2Height;
+                    f_bot_SiO2_Depth=botSiO2Depth;
+                    f_bot_Cu_r=botCur;
+                    f_bot_Cu_d=botCuh;
+                    f_bot_Recess=botRecess;
+                    f_recess_shape=rshape;
+                    f_OX=OX;
+                    f_OY=OY;
+                    displayArea.innerHTML = `
+                        <h3>Mesh ${selectedKey} Data:</h3>
+                            <p>Top SiO2 Width: ${topSiO2Width} um</p>
+                            <p>Top SiO2 Height: ${topSiO2Height} um</p>
+                            <p>Top SiO2 Depth: ${topSiO2Depth} um</p>
+                            <p>Top Cu Radius: ${topCur} um</p>
+                            <p>Top Cu Height: ${topCuh} um</p>
+                            <p>Top Cu Recess: ${topRecess} nm</p>
+                            <p>Bot SiO2 Width: ${botSiO2Width} um</p>
+                            <p>Bot SiO2 Height: ${botSiO2Height} um</p>
+                            <p>Bot SiO2 Depth: ${botSiO2Depth} um</p>
+                            <p>Bot Cu Radius: ${botCur} um</p>
+                            <p>Bot Cu Height: ${botCuh} um</p>
+                            <p>Bot Cu Recess: ${botRecess} nm</p>
+                            <p>Recess Shape:${rshape}</p>
+                            <p>Offset X: ${OX} um</p>
+                            <p>Offset Y: ${OY} um</p>
+                    `;
+                    } else {
+                        // If no data is selected, show a default message
+                        document.getElementById("dataDisplay").innerHTML = "<p>Select an option from the dropdown to see the information.</p>";
+                        const iframe = document.getElementById("meshViewer");
+                        iframe.src = '';
+                    }
+             });
+        } else {
+            document.getElementById("mesh_sites").innerHTML = "No mesh data found.";
+        }
+        window.addEventListener('beforeunload', function() {
+            // Clear localStorage when the page is about to unload
+            localStorage.clear();
+            console.log("Local storage has been cleared.");
+        });
+        </script>
+        <script>
+            function updateIframe() {
+                var selectedKey = document.getElementById("dataDropdown").value; // Gets the value from the dropdown
+                var url = `/view_mesh/${selectedKey}?`;//uses the same url to update the value
+
+                // Append the slider values as query parameters
+                sliders.forEach(function(sliderObj) {
+                    var opacityValue = sliderObj.slider.value;
+                    url += `${sliderObj.slider.id}=${opacityValue}&`;  // Add each slider value to the URL
+                });
+                //if there is a selected option for the clipping plane then add it to the update for iframe
+                if (clipping_plane_option){
+                    url+=`clipping_plane=${clipping_plane_option}&`;
+                }
+
+                // Remove the last '&' from the URL
+                url = url.slice(0, -1);
+
+                // Update the iframe source
+                document.getElementById("meshViewer").src = url;
+            }
+
+            // Add event listeners to sliders to call the updateIframe function whenever they change
+            sliders.forEach(function(sliderObj) {
+                sliderObj.slider.addEventListener("input", function() {
+                    // Update the slider's corresponding output value
+                    sliderObj.output.textContent = sliderObj.slider.value;
+                    // Call the updateIframe function to refresh the iframe
+                    updateIframe();
+                });
+            });
+        </script>
+        <script>
+            var clipping_plane_option='';
+            function update_clip_plane(value){
+                clipping_plane_option=value;
+                document.getElementById("clipping_plane_val").textContent=clipping_plane_option;
+                updateIframe();
+            }
+            document.getElementById("option-x").addEventListener("click", function() {
+                update_clip_plane('x');
+            });
+
+            document.getElementById("option-y").addEventListener("click", function() {
+                update_clip_plane('y');
+            });
+
+            document.getElementById("option-z").addEventListener("click", function() {
+                update_clip_plane('z');
+            });
+            document.getElementById("option-n").addEventListener("click", function() {
+                update_clip_plane('');
+                document.getElementById("clipping_plane_val").textContent='Not selected';
+            });
         </script>
         </html>

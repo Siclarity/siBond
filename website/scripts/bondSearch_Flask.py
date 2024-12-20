@@ -83,7 +83,7 @@ def calculate_areas(shape1,shape2,shape1_type,shape2_type):
 #filename="CLIP.gds"
 filename="Test.gds"
 #filename="displacement.gds"
-def search(filename):
+def search(filename, layer):
     if(filename.lower().endswith('.gds')):
         rtree = index.Index()
         ly = pya.Layout()
@@ -92,8 +92,10 @@ def search(filename):
         #print(f"Viewer contains {(view.current_layer_list)} layers.")
         top_cell = ly.top_cell()
         top_cell.flatten(-1,True)
-        layer1 = ly.layer(110, 0)
-        layer2 = ly.layer(11, 0)
+        layer1 = ly.layer((layer[0]))
+        layer2 = ly.layer((layer[1]))
+        print(layer1)
+        print(layer2)
         layer3 = ly.layer(4,0) #intersection layer will be added
         shapes1 = []
         start_time=datetime.now()
@@ -277,6 +279,7 @@ def search(filename):
                     ineffective_width=(max_right-min_left)
                     ineffective_height=(max_top-min_bot)
                     ineffective_area=(ineffective_width*ineffective_height)-effective_area
+                    print(f"Ineffective area:{ineffective_area}")
 
                 print("Passed the reassignment of bounding box/area calculations for the box")
                 # width=(min_right-max_left)
@@ -285,8 +288,7 @@ def search(filename):
                 x_right=a.right-b.right
                 y_bot=a.bottom-b.bottom
                 y_top=a.top-b.top
-                ineffective_area=max(a_area,b_area)-effective_area
-                print(f"Ineffective area:{ineffective_area}")
+                
                 x=(x_left+x_right)/2
                 y=(y_bot+y_top)/2
                 site=["FM",effective_area,c,d,x_left,x_right,y_bot,y_top,ineffective_area]#intersecting_site[i][0],intersecting_site[i][1]]
@@ -338,11 +340,15 @@ def search(filename):
                     a=a.bbox()
                     print(f"Shape 1's new bbox:{a}")
                     effective_area=min(a_area,b_area)
+                    ineffective_area=max(a_area,b_area)-effective_area
+                    print(f"Ineffective area:{ineffective_area}")
                 elif c=='Box' and d=='Polygon':
                     b,b_area,a_area=calculate_areas(a,b,c,d)
                     b=b.bbox()
                     print(f"Shape 2's new bbox:{b}")
                     effective_area=min(a_area,b_area)
+                    ineffective_area=max(a_area,b_area)-effective_area
+                    print(f"Ineffective area:{ineffective_area}")
                 elif c=="Polygon" and d=='Polygon':
                     a,a_area,b,b_area=calculate_areas(a,b,c,d)
                     #A will be the intersection area hence the a_area will be the intersection area
@@ -350,6 +356,8 @@ def search(filename):
                     #B will be the union area hence the b_area will be the union area
                     b=b.bbox()
                     effective_area=min(a_area,b_area)
+                    ineffective_area=max(a_area,b_area)-effective_area
+                    print(f"Ineffective area:{ineffective_area}")
                 else:
                     a_area,b_area=calculate_areas(a,b,c,d)
                     min_left=min(a.left,b.left)
@@ -365,7 +373,8 @@ def search(filename):
                     effective_area=effective_width*effective_height
                     ineffective_width=(max_right-min_left)
                     ineffective_height=(max_top-min_bot)
-                    ineffective_area=(ineffective_width*ineffective_height)-effective_area
+                    ineffective_area=ineffective_width*ineffective_height
+                    print(f"Ineffective area:{ineffective_area}")
                 print("Passed the reassignment of bounding box/area calculations for the box")
                 # width=(min_right-max_left)
                 # height=(min_top-max_bot)
@@ -373,8 +382,6 @@ def search(filename):
                 x_right=a.right-b.right
                 y_bot=a.bottom-b.bottom
                 y_top=a.top-b.top
-                ineffective_area=max(a_area,b_area)-effective_area
-                print(f"Ineffective area:{ineffective_area}")
                 x=(x_left+x_right)/2
                 y=(y_bot+y_top)/2  
                 site=["OM",effective_area,c,d,x_left,x_right,y_bot,y_top,ineffective_area]#intersecting_site[i][0],intersecting_site[i][1]] need to get the shape of these to ensure they are not the same

@@ -67,7 +67,7 @@
                 font-style: normal;
                 font-weight: 300;
                 line-height: normal;
-                padding-top:10vh;
+                padding-top:10px;
             }
             .left-side-box .spacer{
                 padding-bottom: 5vh;
@@ -135,6 +135,46 @@
                 background-color: green;
                 cursor: pointer;
             }
+            .recessDropdown {
+                position: relative;
+                display: flex;
+            }
+
+            .recessDropdown button {
+                background-color: #4CAF50; 
+                color: white;
+                padding: 10px 20px;
+                font-size: 16px;
+                border: none;
+                cursor: pointer;
+                border-radius: 5px;
+            }
+            .recessContent {
+                display: none;
+                position: absolute;
+                background-color: #f9f9f9;
+                min-width: 160px;
+                box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+                z-index: 1;
+                border-radius: 5px;
+            }
+            .recessContent div {
+                color: black;
+                padding: 12px 16px;
+                text-decoration: none;
+                display: block;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+            .recessContent div:hover {
+                background-color: #ddd;
+            }
+            .recessDropdown:hover .recessContent {
+                display: block;
+            }
+            .recessDropdown:hover button {
+                background-color: #3e8e41;
+            }
         </style>
         <script>
             // Function to handle form submission
@@ -189,6 +229,7 @@
                         throw new Error("Network response was not ok: " + response.statusText);
                     }
                     return response.json();
+                    
                 })
                 .then(data => {
                     // Handle the response data
@@ -200,10 +241,14 @@
                     console.error("Error:", error);
                     alert("Error: " + error.message);
                 });
+                ran_unique_site=false;
+                setTimeout(() => {  
+                            updateGallery(); 
+                    }, 3000);
             }
         </script>
     </head>
-    <body>  
+    <body onload="updateGallery()">  
         <div class="topbar">
             <img src="/static/images/SiClarity-Logo.png" alt="SiClarity-Logo"/>
             <h1>MELD</h1>
@@ -260,6 +305,16 @@
                     <br>
                     <input type="number" class="height" id="heightV1V2"placeholder="Height" name="Height_V1V2">
                 </form>
+                <div class="spacer"></div>
+                <div class="recessDropdown">
+                    <button id="recessDropdown">Recess Shape</button>
+                    <div class="recessContent">
+                        <div id="option-el">ellipse</div>
+                        <div id="option-sq">square</div>
+                        <div id="option-sp">sphere</div>
+                    </div>
+                </div>
+                <div class="spacer"></div>
                 <a href="/" ><button class="home_button"> Go Home</button></a>
             </div>
             <div class="whitespace">
@@ -291,24 +346,47 @@
           
         <script>
             var dictionary_sites;
+            var dbUnits;
             function IdentifyUniqueBondingSites() {
                 const but_search = document.getElementById("bondSearch");
                 but_search.disabled=true;
-                // Get the new image source from the server
-                fetch('/search')  // Make a GET request to /h to get the updated image filename
+                const selectedLayers = [];
+                const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+
+                checkboxes.forEach(checkbox => {
+                    selectedLayers.push(checkbox.value);  // Get the value of each checked checkbox
+                });
+                if (selectedLayers.length !== 2) {
+                    alert("Please select exactly 2 layers to identify unique bondsites.");
+                    but_search.disabled=false; 
+                    return;  // Exit the function if not exactly 2 checkboxes are selected
+                }
+
+
+                // Transforms the seleected layers to be in JSON format for front end  
+                const requestData = {
+                    layers: selectedLayers  // Array of selected checkbox values
+                };
+
+                fetch('/search', {  // Make a POST request
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ layers: selectedLayers })
+                })
                 .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Network response was not ok');
-                        }
-                        
                     return response.json();  // Parse the response body as JSON
-                    })
+                })
                 .then(data => {
                         // Handle the response data
                         //alert("Success: " + JSON.stringify(data));
-                        dictionary_sites=data.Result.List_of_unique_bonding_site
-                        console.log(data.Result)
-                        console.log(dictionary_sites)
+                        dictionary_sites=data.Result.List_of_unique_bonding_site;
+                        console.log(data.Result);
+                        console.log(dictionary_sites);
+                        console.log(data)
+                        dbUnits=data.Units;
+                        console.log(dbUnits);
                         let unique_site=document.querySelector(".unique_site");
                         if(!unique_site){
                             unique_site= document.createElement("DIV");
@@ -335,8 +413,12 @@
                         FM.textContent=`Full Match: ${data.Result.Full_Matched}`;
                         document.getElementById("Information").appendChild(FM);
                         ran_unique_site=true;
+                        setTimeout(() => {  
+                            updateGallery(); 
+                        }, 3000);
                     })
-                }
+            }
+                
         </script>
 
         <script>
@@ -484,22 +566,38 @@
         </script>
 
         <script>
+            var reupdate_gal=false;
+
             function updateGallery() {
                 fetch('/gallery')
                     .then(response => response.json())
                     .then(images => {
                         const gallery = document.getElementById('gallery');
                         const existingImages = gallery.querySelectorAll('img');
-                        if (images.length === 0) {
+                        if(images.length!=0){
+                            ran_unique_site=true;
+                            console.log(images.length);
+                        }
+                        if ((images.length === 0 || ran_unique_site==false)&& reupdate_gal==false) {
                             // Clear all images in the gallery
+                            gallery.innerHTML="";
                             existingImages.forEach(img => img.remove());
                             console.log("Gallery is empty. Removed all images.");
                             const generate_mesh=document.getElementById('generateMesh');
                             generate_mesh.disabled=true;
                             generate_mesh.classList.remove('active');
+                            gallery.innerHTML='';
+                            reupdate_gal=true;
+                            console.log('Reruning updateGallery');
+                            updateGallery();
+                            console.log('Returning out of updateGallery');
                             return;
                         }
-
+                        if(reupdate_gal==true){
+                            reupdate_gal=false;
+                            console.log('Re update Gallery is now false');
+                            return;
+                        }
                         // Loop through all the images fetched from the server
                         images.sort((a, b) => {
                             // Extract the numeric part from the filenames using regular expression
@@ -535,7 +633,7 @@
                     })
                     .catch(error => console.error('Error loading gallery:', error));
             }
-        setInterval(updateGallery, 6000);
+        // setInterval(updateGallery, 6000);
         </script>
         <script>
         let availableLayers = [];
@@ -637,27 +735,34 @@
                         OffsetM2:offsetM2,
                         HeightM2:heightM2,
                         OffsetV1V2:offsetV1V2,
-                        HeightV1V2:heightV1V2
+                        HeightV1V2:heightV1V2,
+                        DBUnit:dbUnits,
+                        recessShape:recess_type
                     }
                     alert(JSON.stringify(data,null, 2));
                     console.log(data);
-                    fetch('/generate_gds_mesh', {
+                    // Send data to the server for processing
+                    fetch('/generate_mesh_content', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
                         body: JSON.stringify(data)  // Send the data as JSON
                     })
-                    .then(response => response.json())  // Wait for the server response
-                    .then(data => {
-                        // Once the data is processed, redirect to the custom page
-                        window.location.href = '/mesh'; 
+                    .then(response => response.json())  // Assuming the server responds with JSON data
+                    .then(processedData => {
+                        // Store the processed data in localStorage
+                        localStorage.setItem('mesh_sites', JSON.stringify(processedData));
+
+                        // Redirect to /mesh page
+                        window.location.href = '/mesh';
                     })
                     .catch(error => {
                         console.error('Error:', error);
                         alert('There was an error processing your request. Please try again.');
                     });
             }
+        
         </script>
         <script>
             //This is what we can use to pass to the python file, Most likely I will need to create a new one for the gds upload
@@ -705,10 +810,27 @@
             });
         });
         function button_status(){
+            let=info_content=false;
+            const info=document.getElementById('Information');
+            if(info.textContent.trim()===''){
+                info_content=false;
+            }
+            else{
+                info_content=true;
+            }
             console.log(`Input Fields:${input_fields}`);
             console.log(`Unique Sites:${ran_unique_site}`);
+            console.log(`Recess Shape:${recess_type}`);
+            console.log(`Info Content:${info_content}`);
+            if(recess_type===''){
+                type_selected=false;
+            }
+            else{
+                type_selected=true;
+            }
+
             const generate_mesh=document.getElementById('generateMesh');
-            if(input_fields && ran_unique_site){
+            if(input_fields && ran_unique_site &&type_selected &&info_content){
                 generate_mesh.disabled=false;
                 generate_mesh.classList.add('active');
             }
@@ -718,6 +840,25 @@
             }
         }
         setInterval(button_status, 1000);
+        </script>
+        <script>
+                var type_selected=false;
+                var recess_type='';
+                var dropdownButton = document.getElementById('recessDropdown');
+                document.getElementById("option-el").addEventListener("click", function() {
+                    recess_type='ellipse';
+                    dropdownButton.textContent='ellipse';
+                });
+    
+                document.getElementById("option-sq").addEventListener("click", function() {
+                    recess_type='square';
+                    dropdownButton.textContent='square';
+                });
+    
+                document.getElementById("option-sp").addEventListener("click", function() {
+                    recess_type='sphere';
+                    dropdownButton.textContent='sphere';
+                });
         </script>
    </body>
 </html>
