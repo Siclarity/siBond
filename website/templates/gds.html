@@ -67,7 +67,7 @@
                 font-style: normal;
                 font-weight: 300;
                 line-height: normal;
-                padding-top:10vh;
+                padding-top:10px;
             }
             .left-side-box .spacer{
                 padding-bottom: 5vh;
@@ -134,6 +134,46 @@
             #generateMesh.active {
                 background-color: green;
                 cursor: pointer;
+            }
+            .recessDropdown {
+                position: relative;
+                display: flex;
+            }
+
+            .recessDropdown button {
+                background-color: #4CAF50; 
+                color: white;
+                padding: 10px 20px;
+                font-size: 16px;
+                border: none;
+                cursor: pointer;
+                border-radius: 5px;
+            }
+            .recessContent {
+                display: none;
+                position: absolute;
+                background-color: #f9f9f9;
+                min-width: 160px;
+                box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+                z-index: 1;
+                border-radius: 5px;
+            }
+            .recessContent div {
+                color: black;
+                padding: 12px 16px;
+                text-decoration: none;
+                display: block;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+            .recessContent div:hover {
+                background-color: #ddd;
+            }
+            .recessDropdown:hover .recessContent {
+                display: block;
+            }
+            .recessDropdown:hover button {
+                background-color: #3e8e41;
             }
         </style>
         <script>
@@ -265,6 +305,16 @@
                     <br>
                     <input type="number" class="height" id="heightV1V2"placeholder="Height" name="Height_V1V2">
                 </form>
+                <div class="spacer"></div>
+                <div class="recessDropdown">
+                    <button id="recessDropdown">Recess Shape</button>
+                    <div class="recessContent">
+                        <div id="option-el">ellipse</div>
+                        <div id="option-sq">square</div>
+                        <div id="option-sp">sphere</div>
+                    </div>
+                </div>
+                <div class="spacer"></div>
                 <a href="/" ><button class="home_button"> Go Home</button></a>
             </div>
             <div class="whitespace">
@@ -686,7 +736,8 @@
                         HeightM2:heightM2,
                         OffsetV1V2:offsetV1V2,
                         HeightV1V2:heightV1V2,
-                        DBUnit:dbUnits
+                        DBUnit:dbUnits,
+                        recessShape:recess_type
                     }
                     alert(JSON.stringify(data,null, 2));
                     console.log(data);
@@ -759,10 +810,27 @@
             });
         });
         function button_status(){
+            let=info_content=false;
+            const info=document.getElementById('Information');
+            if(info.textContent.trim()===''){
+                info_content=false;
+            }
+            else{
+                info_content=true;
+            }
             console.log(`Input Fields:${input_fields}`);
             console.log(`Unique Sites:${ran_unique_site}`);
+            console.log(`Recess Shape:${recess_type}`);
+            console.log(`Info Content:${info_content}`);
+            if(recess_type===''){
+                type_selected=false;
+            }
+            else{
+                type_selected=true;
+            }
+
             const generate_mesh=document.getElementById('generateMesh');
-            if(input_fields && ran_unique_site){
+            if(input_fields && ran_unique_site &&type_selected &&info_content){
                 generate_mesh.disabled=false;
                 generate_mesh.classList.add('active');
             }
@@ -772,6 +840,25 @@
             }
         }
         setInterval(button_status, 1000);
+        </script>
+        <script>
+                var type_selected=false;
+                var recess_type='';
+                var dropdownButton = document.getElementById('recessDropdown');
+                document.getElementById("option-el").addEventListener("click", function() {
+                    recess_type='ellipse';
+                    dropdownButton.textContent='ellipse';
+                });
+    
+                document.getElementById("option-sq").addEventListener("click", function() {
+                    recess_type='square';
+                    dropdownButton.textContent='square';
+                });
+    
+                document.getElementById("option-sp").addEventListener("click", function() {
+                    recess_type='sphere';
+                    dropdownButton.textContent='sphere';
+                });
         </script>
    </body>
 </html>

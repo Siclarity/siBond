@@ -38,10 +38,11 @@ def create_mesh(JSON_st):
                     Js_in[key] = float(value)
                 except ValueError:
                     pass
-    print(f'Converted Dict:{Js_in}')
+    print(f'Converted Dict:{Js_in_dict}')
     number_of_meshes=0
     meshes_directory =join('static', 'meshes')
     gds=False
+    print(keys)
     if keys[0]=='Dictionary':
         print("From GDS")
         number_of_meshes=len(Js_in_dict)
@@ -75,7 +76,7 @@ def create_mesh(JSON_st):
             Cu_r_top_type=current_count.get('Shape 2 type:')
             Cu_r_top=s2_width*dbUnit
             Cu_h_top=s2_height*dbUnit
-            Cu_dish_top=abs(Js_in['HeightV1V2'])
+            Cu_dish_top=abs(Js_in['HeightV1V2'])*0.001
 
             SiO2_w_bot=abs(Js_in['OffsetM1'])
             SiO2_d_bot=abs(Js_in['OffsetM1'])
@@ -84,13 +85,13 @@ def create_mesh(JSON_st):
             Cu_r_bot_type=current_count.get('Shape 1 type:')
             Cu_r_bot=s1_width*dbUnit
             Cu_h_bot=s1_height*dbUnit
-            Cu_dish_bot=abs(Js_in['HeightV1V2'])
+            Cu_dish_bot=abs(Js_in['HeightV1V2']) *0.001
 
             # offset_x=abs(Js_in['OffsetV1V2'])
             offset_x=0
             offset_y=0
 
-            recess_shape="ellipse"
+            recess_shape=Js_in['recessShape']
         #if this is just the Create your own mesh we can assign from the dictionary 
         else:
             SiO2_w_top=Js_in['TSiO2w']
@@ -230,7 +231,7 @@ def create_mesh(JSON_st):
                 print("Mesh Deleted")
             move(file_name, target_path) 
 
-        site_information[count]={"Top SiO2 Width":SiO2_w_top,"Top SiO2 Height":SiO2_d_top,"Top SiO2 Depth":SiO2_h_top,"Top Cu Radius":Cu_r_top,"Top Cu Height":Cu_h_top, "Top Recess Value":Cu_dish_top, "Bot SiO2 Width":SiO2_w_bot, "Bot SiO2 Height":SiO2_d_bot,"Bot SiO2 Depth":SiO2_h_bot,"Bot Cu Radius":Cu_r_bot,"Bot Cu Height":Cu_h_bot, "Bot Recess Value":Cu_dish_bot, "Offset X":offset_x,"Offset Y":offset_y}
+        site_information[count]={"Top SiO2 Width":SiO2_w_top,"Top SiO2 Height":SiO2_d_top,"Top SiO2 Depth":SiO2_h_top,"Top Cu Radius":Cu_r_top,"Top Cu Height":Cu_h_top, "Top Recess Value":Cu_dish_top, "Bot SiO2 Width":SiO2_w_bot, "Bot SiO2 Height":SiO2_d_bot,"Bot SiO2 Depth":SiO2_h_bot,"Bot Cu Radius":Cu_r_bot,"Bot Cu Height":Cu_h_bot, "Bot Recess Value":Cu_dish_bot,"Recess Shape":recess_shape,"Offset X":offset_x,"Offset Y":offset_y}
     return site_information
 
 class Material:

@@ -374,6 +374,7 @@
                 "Bot Cu Radius: "+ f_bot_Cu_r +' um\n'+
                 "Bot Cu Height: "+ f_bot_Cu_d+' um\n'+
                 "Bot Recess: "+ f_bot_Recess +' nm\n'+
+                "Recess Shape: "+f_recess_shape+'\n'+
                 "Offset X: " + f_OX +' um\n'+
                 "Offset Y: "+ f_OY +' um\n');
         });
@@ -392,6 +393,7 @@
            var f_bot_Cu_r;
            var f_bot_Cu_d;
            var f_bot_Recess;
+           var f_recess_shape;
            var f_OX;
            var f_OY;
         var meshSites = localStorage.getItem('mesh_sites');
@@ -429,6 +431,7 @@
                     let botCur = !isNaN(selectedData["Bot Cu Radius"]) ? selectedData["Bot Cu Radius"].toFixed(3) : "N/A";
                     let botCuh = !isNaN(selectedData["Bot Cu Height"]) ? selectedData["Bot Cu Height"].toFixed(3) : "N/A";
                     let botRecess = !isNaN(selectedData["Bot Recess Value"]) ? selectedData["Bot Recess Value"].toFixed(3) : "N/A";
+                    let rshape=(selectedData["Recess Shape"]);
                     let OX = !isNaN(selectedData["Offset X"]) ? selectedData["Offset X"].toFixed(3) : "N/A";   
                     let OY = !isNaN(selectedData["Offset Y"]) ? selectedData["Offset Y"].toFixed(3) : "N/A";
                     botRecess=botRecess*1000
@@ -445,6 +448,7 @@
                     f_bot_Cu_r=botCur;
                     f_bot_Cu_d=botCuh;
                     f_bot_Recess=botRecess;
+                    f_recess_shape=rshape;
                     f_OX=OX;
                     f_OY=OY;
                     displayArea.innerHTML = `
@@ -461,6 +465,7 @@
                             <p>Bot Cu Radius: ${botCur} um</p>
                             <p>Bot Cu Height: ${botCuh} um</p>
                             <p>Bot Cu Recess: ${botRecess} nm</p>
+                            <p>Recess Shape:${rshape}</p>
                             <p>Offset X: ${OX} um</p>
                             <p>Offset Y: ${OY} um</p>
                     `;
