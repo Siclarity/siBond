@@ -271,7 +271,7 @@
         <script>
             var tempStepsInput=document.getElementById('temp_steps');
             var tempDivContainer=document.getElementById('temperatureContainer');
-
+            var testButton=document.getElementById('test');
             function createTempBoxes(){
                 tempDivContainer.innerHTML='';
                 var steps=parseInt(tempStepsInput.value);
@@ -319,7 +319,81 @@
             tempStepsInput.addEventListener("input", createTempBoxes);
         </script>
         <script>
+            //validates the inputs before moving onto the next steps
+            testButton.addEventListener("click", function() {
+                var steps = parseInt(tempStepsInput.value);
+
+                // Validation for valid number of steps
+                if (isNaN(steps) || steps <= 0) {
+                    alert("Please enter a valid positive number of temperature steps.");
+                    return; // Stop further if validation fails
+                }
+
+                var temperatures = [];
+                var times = [];
+
+                // Collecting values for each step
+                for (var i = 1; i <= steps; i++) {
+                    var tempInput = document.getElementById("temp_step_" + i);
+                    var timeInput = document.getElementById("time_step_" + i);
+
+                    // Validate the temperature and time inputs
+                    if (!tempInput || !timeInput) {
+                        continue;
+                    }
+                    var temp = parseFloat(tempInput.value);
+                    var time = parseFloat(timeInput.value);
+                    //this will check to see if the temperture is a valid number (sub 7 degC is Copper freezing) and the time input must be a valid integer
+                    if (isNaN(temp) || isNaN(time) || temp < -7 || time <= 0) {
+                        alert("Please enter valid values for Temperature " + i + " and Time "+ i +".");
+                        return;
+                    }
+
+                    // Store the values in arrays
+                    temperatures.push(temp);
+                    times.push(time);
+                }
+                var displayed_mesh_data=document.getElementById("dataDisplay").textContent.trim();
+                if (displayed_mesh_data=== "Select an option from the dropdown to see the information."){
+                    alert("Please select a mesh");
+                    return;
+                }
+                
+             // Show an alert with the collected data
+            alert("Temperatures: " + temperatures.join(", ") + " °C\n" +
+                "Times: " + times.join(", ") + " s\n"+
+                "Top SiO2 Width: " +f_top_SiO2_Width +' um\n'+
+                "Top SiO2 Height: "+ f_top_SiO2_Height +' um\n'+
+                "Top SiO2 Depth: "+ f_top_SiO2_Depth +' um\n'+
+                "Top Cu Radius: "+ f_top_Cu_r +' um\n'+
+                "Top Cu Height: "+ f_top_Cu_d+' um\n'+
+                "Top Recess: "+ f_top_Recess+' nm\n'+
+                "Bot SiO2 Width: " +f_bot_SiO2_Width +' um\n'+
+                "Bot SiO2 Height: "+ f_bot_SiO2_Height +' um\n'+
+                "Bot SiO2 Depth: "+ f_bot_SiO2_Depth +' um\n'+
+                "Bot Cu Radius: "+ f_bot_Cu_r +' um\n'+
+                "Bot Cu Height: "+ f_bot_Cu_d+' um\n'+
+                "Bot Recess: "+ f_bot_Recess +' nm\n'+
+                "Offset X: " + f_OX +' um\n'+
+                "Offset Y: "+ f_OY +' um\n');
+        });
+        </script>
+        <script>
            // Retrieve the 'mesh_sites' data from localStorage
+           var f_top_SiO2_Width;
+           var f_top_SiO2_Height;
+           var f_top_SiO2_Depth;
+           var f_top_Cu_r;
+           var f_top_Cu_d;
+           var f_top_Recess;
+           var f_bot_SiO2_Width;
+           var f_bot_SiO2_Height;
+           var f_bot_SiO2_Depth;
+           var f_bot_Cu_r;
+           var f_bot_Cu_d;
+           var f_bot_Recess;
+           var f_OX;
+           var f_OY;
         var meshSites = localStorage.getItem('mesh_sites');
         if (meshSites) {
             // Parse the JSON string into a JavaScript object
@@ -359,6 +433,20 @@
                     let OY = !isNaN(selectedData["Offset Y"]) ? selectedData["Offset Y"].toFixed(3) : "N/A";
                     botRecess=botRecess*1000
                     topRecess=topRecess*1000
+                    f_top_SiO2_Width=topSiO2Width;
+                    f_top_SiO2_Height=topSiO2Height;
+                    f_top_SiO2_Depth=topSiO2Depth;
+                    f_top_Cu_r=topCur;
+                    f_top_Cu_d=topCuh;
+                    f_top_Recess=topRecess;
+                    f_bot_SiO2_Width=botSiO2Width;
+                    f_bot_SiO2_Height=botSiO2Height;
+                    f_bot_SiO2_Depth=botSiO2Depth;
+                    f_bot_Cu_r=botCur;
+                    f_bot_Cu_d=botCuh;
+                    f_bot_Recess=botRecess;
+                    f_OX=OX;
+                    f_OY=OY;
                     displayArea.innerHTML = `
                         <h3>Mesh ${selectedKey} Data:</h3>
                             <p>Top SiO2 Width: ${topSiO2Width} um</p>
@@ -377,10 +465,12 @@
                             <p>Offset Y: ${OY} um</p>
                     `;
                     } else {
-                    // If no data is selected, show a default message
-                    document.getElementById("dataDisplay").innerHTML = "<p>Select an option from the dropdown to see the information.</p>";
-                }
-            });
+                        // If no data is selected, show a default message
+                        document.getElementById("dataDisplay").innerHTML = "<p>Select an option from the dropdown to see the information.</p>";
+                        const iframe = document.getElementById("meshViewer");
+                        iframe.src = '';
+                    }
+             });
         } else {
             document.getElementById("mesh_sites").innerHTML = "No mesh data found.";
         }
@@ -442,6 +532,7 @@
             });
             document.getElementById("option-n").addEventListener("click", function() {
                 update_clip_plane('');
+                document.getElementById("clipping_plane_val").textContent='Not selected';
             });
         </script>
         </html>
