@@ -38,7 +38,7 @@ def create_mesh(JSON_st):
                     Js_in[key] = float(value)
                 except ValueError:
                     pass
-    print(f'Converted Dict:{Js_in_dict}')
+    # print(f'Converted Dict:{Js_in}')
     number_of_meshes=0
     meshes_directory =join('static', 'meshes')
     gds=False
